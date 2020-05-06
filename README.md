@@ -9,7 +9,7 @@ It contains all the repositories on GitHub as of the end of 2016, excluding expl
 
 Then, we computed embeddings for tokens in code with [fasttext](https://github.com/facebookresearch/fastText) and clustered them
 into 256 groups of similar tokens. The clusters represent topics at token level. For each repository we computed 
-its numerical representation in the space token clusters. It is a 256-dimensional vector, where coordinate along the
+its numerical representation in the space of token clusters. It is a 256-dimensional vector, where coordinate along the
 dimension _K_ is the number of occurrences of tokens from cluster _K_ in the repository.
 
 Finally, we measure similarity of two repositories as cosine distance between their vector representations. The intuition
