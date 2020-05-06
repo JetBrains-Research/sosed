@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import faiss
 
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -36,6 +37,8 @@ class ProcessedData:
 
         self._repo_names_file = folder / 'repo_names.txt'
         self._repo_vectors_file = folder / 'repo_vectors.npy'
+        self._repo_names = None
+        self._repo_vectors = None
 
     @staticmethod
     def _docword_index(filename: str) -> int:
@@ -50,6 +53,9 @@ class ProcessedData:
         :return: batch indices found in tokenizer output.
         """
         return self._indices
+
+    def folder(self) -> Path:
+        return self._folder
 
     def load_tokens_vocab(self, ind: int) -> Dict[str, int]:
         """
@@ -91,11 +97,13 @@ class ProcessedData:
         return self._docword[ind]
 
     def store_repo_names(self, repo_names: List[str]) -> None:
+        self._repo_names = repo_names
         with self._repo_names_file.open('w') as repo_names_file:
             for name in repo_names:
                 repo_names_file.write(f'{name}\n')
 
     def store_repo_vectors(self, repo_vectors: np.ndarray) -> None:
+        self._repo_vectors = repo_vectors
         np.save(str(self._repo_vectors_file)[:-len('.npy')], repo_vectors, allow_pickle=True)
 
     def has_stored_repo_names(self) -> bool:
@@ -103,6 +111,16 @@ class ProcessedData:
 
     def has_stored_repo_vectors(self) -> bool:
         return self._repo_vectors_file.exists()
+
+    def load_repo_names(self) -> List[str]:
+        if self._repo_names is None:
+            self._repo_names = [line.strip() for line in self._repo_names_file.open('r')]
+        return self._repo_names
+
+    def load_repo_vectors(self) -> np.ndarray:
+        if self._repo_vectors is None:
+            self._repo_vectors = np.load(self._repo_vectors_file, allow_pickle=True)
+        return self._repo_vectors
 
 
 def assign_clusters(tokens_vocab: Dict[str, int]) -> Dict[int, int]:
@@ -143,3 +161,13 @@ def compute_vectors(docword: Dict[str, Counter], tokens_to_clusters: Dict[int, i
                 vectors[i][cluster] += count
 
     return repo_names, vectors
+
+
+def normalize_vectors(vectors: np.ndarray) -> np.ndarray:
+    return vectors / np.linalg.norm(vectors, axis=1, keepdims=True)
+
+
+def build_similarity_index(embedding: np.ndarray) -> faiss.IndexFlatIP:
+    index = faiss.IndexFlatIP(embedding_dim())
+    index.add(embedding)
+    return index

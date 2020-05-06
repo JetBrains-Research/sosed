@@ -4,23 +4,24 @@ import numpy as np
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
-from .utils import mkdir
-from .data_processing import ProcessedData, assign_clusters, compute_vectors
+from .utils import mkdir, get_project_names, get_project_vectors
+from .data_processing import ProcessedData, assign_clusters, compute_vectors, normalize_vectors, build_similarity_index
 from tokenizer.topic_dynamics.run import main as run_tokenizer
 
 
-def tokenize(input_file: str, output: str, batches: int, force: bool) -> None:
+def tokenize(input_file: str, output_dir: str, batches: int, force: bool) -> None:
     """
     :param input_file: input file with a list of links to projects for analysis.
-    :param output: directory to store data during tokenizing.
+    :param output_dir: directory to store data during tokenizing.
     :param batches: size of project batches that are saved to one file.
     :param force: if True, tokenizer will re-run (even if results have been stored previously).
     :return: None.
     """
 
+    mkdir(output_dir)
     try:
-        if not force and len(ProcessedData(Path(output)).indices()) > 0:
-            print(f'Found tokenizer output in {output}.\n'
+        if not force and len(ProcessedData(Path(output_dir)).indices()) > 0:
+            print(f'Found tokenizer output in {output_dir}.\n'
                   f'If you want to re-run tokenizer, pass --force flag.')
             return
     except ValueError:
@@ -29,22 +30,20 @@ def tokenize(input_file: str, output: str, batches: int, force: bool) -> None:
     if not os.path.exists(input_file):
         raise ValueError(f'Input file {input_file} does not exist!')
 
-    mkdir(output)
-    tokenizer_args = Namespace(input=input_file, output=output, batches=batches)
+    tokenizer_args = Namespace(input=input_file, output=output_dir, batches=batches)
     print(f'Running tokenizer on repos listed in {input_file}')
     run_tokenizer(tokenizer_args)
 
 
-def vectorize(output: str, force: bool) -> None:
+def vectorize(processed_data: ProcessedData, force: bool) -> None:
     """
     Compute numerical representations for repositories processed by tokenizer.
-    :param output: directory where tokenizer stored extracted data about tokens in repositories.
+    :param processed_data: wrapper for directory where tokenizer stored extracted data about tokens in repositories.
     :param force: if True, vectorization will re-run (even if results have been stored previously).
     :return: None.
     """
-    processed_data = ProcessedData(Path(output))
     if not force and processed_data.has_stored_repo_names() and processed_data.has_stored_repo_vectors():
-        print(f'Found precomputed vectors in {output}.\n'
+        print(f'Found precomputed vectors in {processed_data.folder()}.\n'
               f'If you wan to re-run vector computation, pass --force flag.')
         return
 
@@ -65,8 +64,24 @@ def vectorize(output: str, force: bool) -> None:
     processed_data.store_repo_vectors(all_vectors)
 
 
-def analyze():
-    pass
+def analyze(processed_data: ProcessedData, min_stars: int, closest: int) -> None:
+    repo_names = processed_data.load_repo_names()
+    repo_vectors = normalize_vectors(processed_data.load_repo_vectors())
+
+    project_names = get_project_names(min_stars)
+    project_embed = get_project_vectors(min_stars)
+
+    index = build_similarity_index(project_embed)
+
+    distances, indices = index.search(repo_vectors, closest)
+
+    for repo_name, dist_vector, idx in zip(repo_names, distances, indices):
+        print()
+        print(f'Top picks for {repo_name}')
+        for ind, dist in zip(idx, dist_vector):
+            print(f'https://github.com/{project_names[ind]} | {dist:.4f}')
+        print()
+
 
 
 if __name__ == "__main__":
@@ -75,11 +90,18 @@ if __name__ == "__main__":
                         help="Full path to the input file with a list of links to GitHub.")
     parser.add_argument("-o", "--output", required=True,
                         help="Full path to the directory for storing extracted data.")
-    parser.add_argument("-b", "--batches", default=100,
+    parser.add_argument("-b", "--batches", default=100, type=int,
                         help="The size of the batch of projects that are saved to one file.")
     parser.add_argument("-f", "--force", action="store_true",
                         help="If passed, all stages will be re-run, otherwise stored data will be used.")
+    parser.add_argument("-s", "--min_stars", default=100, type=int,
+                        help="Find similar projects among projects with at least min_stars stars. "
+                             "Valid options are 0, 1, 10, 50, 100.")
+    parser.add_argument("-k", "--closest", default=10, type=int,
+                        help="Number of closest repositories to find.")
     args = parser.parse_args()
 
     tokenize(args.input, args.output, args.batches, args.force)
-    vectorize(args.tokenizer_output, args.force)
+    processed_data = ProcessedData(Path(args.output))
+    vectorize(processed_data, args.force)
+    analyze(processed_data, args.min_stars, args.closest)
