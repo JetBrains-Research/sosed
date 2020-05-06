@@ -1,0 +1,5 @@
+https://github.com/Nikitosh/SPbAU-Generation-Z-Team-Reference.git
+https://github.com/egor-bogomolov/spbau-os-hw.git
+https://github.com/egor-bogomolov/spbau-java-hw.git
+https://github.com/egor-bogomolov/web-course.git
+https://github.com/egor-bogomolov/computer-vision-assignments.git
