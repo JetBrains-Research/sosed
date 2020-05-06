@@ -1,0 +1,16 @@
+name: test-env
+channels:
+  - defaults
+  - pytorch
+dependencies:
+  - python=3.7
+  - pygments
+  - joblib
+  - tqdm
+  - cython
+  - numpy
+  - faiss-cpu
+  - pip
+  - pip:
+    - PyStemmer
+    - tree_sitter
