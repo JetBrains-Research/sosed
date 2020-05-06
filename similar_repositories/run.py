@@ -14,6 +14,7 @@ def tokenize(input_file: str, tokenizer_output: str, batches: int, force: bool) 
     :param input_file: input file with a list of links to projects for analysis.
     :param tokenizer_output: directory to store data during tokenizing.
     :param batches: size of project batches that are saved to one file.
+    :param force: if True, tokenizer will re-run (even if results have been stored previously).
     :return: None.
     """
 
@@ -36,7 +37,9 @@ def tokenize(input_file: str, tokenizer_output: str, batches: int, force: bool) 
 
 def vectorize(tokenizer_output: str, force: bool) -> None:
     """
+    Compute numerical representations for repositories processed by tokenizer.
     :param tokenizer_output: directory where tokenizer stored extracted data about tokens in repositories.
+    :param force: if True, vectorization will re-run (even if results have been stored previously).
     :return: None.
     """
     processed_data = ProcessedData(Path(tokenizer_output))
