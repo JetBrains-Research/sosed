@@ -5,7 +5,8 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
 from .utils import mkdir, get_project_names, get_project_vectors
-from .data_processing import ProcessedData, assign_clusters, compute_vectors, normalize_vectors, build_similarity_index
+from .data_processing import ProcessedData, assign_clusters, compute_vectors, normalize_vectors, build_similarity_index, \
+    get_top_supertokens
 from tokenizer.topic_dynamics.run import main as run_tokenizer
 
 
@@ -64,7 +65,7 @@ def vectorize(processed_data: ProcessedData, force: bool) -> None:
     processed_data.store_repo_vectors(all_vectors)
 
 
-def analyze(processed_data: ProcessedData, min_stars: int, closest: int) -> None:
+def analyze(processed_data: ProcessedData, min_stars: int, closest: int, explain: bool) -> None:
     repo_names = processed_data.load_repo_names()
     repo_vectors = normalize_vectors(processed_data.load_repo_vectors())
 
@@ -75,11 +76,20 @@ def analyze(processed_data: ProcessedData, min_stars: int, closest: int) -> None
 
     distances, indices = index.search(repo_vectors, closest)
 
-    for repo_name, dist_vector, idx in zip(repo_names, distances, indices):
+    for repo_name, repo_vector, dist_vector, idx in zip(repo_names, repo_vectors, distances, indices):
         print()
+        print('-----------------------')
         print(f'Top picks for {repo_name}')
         for ind, dist in zip(idx, dist_vector):
             print(f'https://github.com/{project_names[ind]} | {dist:.4f}')
+
+            if explain:
+                top_supertokens = get_top_supertokens(repo_vector, index, int(ind))
+                print('Top supertokens:')
+                print('\n'.join([f'{dim} : {product:.2f}' for dim, product in top_supertokens]))
+                print()
+
+        print('-----------------------')
         print()
 
 
@@ -99,9 +109,11 @@ if __name__ == "__main__":
                              "Valid options are 0, 1, 10, 50, 100.")
     parser.add_argument("-k", "--closest", default=10, type=int,
                         help="Number of closest repositories to find.")
+    parser.add_argument("-e", "--explain", action="store_true",
+                        help="If passed, the output will contain top super-tokens matched with each repository.")
     args = parser.parse_args()
 
     tokenize(args.input, args.output, args.batches, args.force)
     processed_data = ProcessedData(Path(args.output))
     vectorize(processed_data, args.force)
-    analyze(processed_data, args.min_stars, args.closest)
+    analyze(processed_data, args.min_stars, args.closest, args.explain)
