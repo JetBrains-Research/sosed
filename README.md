@@ -19,6 +19,15 @@ behind this idea is that for repositories with similar topics the distribution o
 
 ## Getting started
 
+#### Pip users
+* Install required dependencies
+
+```shell script
+pip install cython
+pip install -r requirements.txt
+```
+
+#### Conda users
 * Create conda environment with required dependencies:
 
 ```shell script
