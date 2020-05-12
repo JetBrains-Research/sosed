@@ -65,11 +65,13 @@ class ProcessedData:
         if self._tokens_vocab[ind] is None:
             vocab = {}
 
-            for line in self._vocab_files[ind].open('r'):
-                line = line.strip()
-                if line:
-                    index, token = line.split(';')
-                    vocab[token] = int(index)
+            with self._vocab_files[ind].open('r') as fin:
+                for line in fin:
+                    line = line.strip()
+                    if line:
+                        index, token = line.split(';')
+                        vocab[token] = int(index)
+
             self._tokens_vocab[ind] = vocab
 
         return self._tokens_vocab[ind]
@@ -82,15 +84,16 @@ class ProcessedData:
         if self._docword[ind] is None:
             docword = {}
 
-            for line in self._docword_files[ind].open('r'):
-                line = line.strip()
-                if line:
-                    repo_name, rest = line.split(';')
-                    token_counter = Counter()
-                    for token_count in rest.split(','):
-                        token_ind, count = token_count.split(':')
-                        token_counter[int(token_ind)] = int(count)
-                    docword[repo_name] = token_counter
+            with self._docword_files[ind].open('r') as fin:
+                for line in fin:
+                    line = line.strip()
+                    if line:
+                        repo_name, rest = line.split(';')
+                        token_counter = Counter()
+                        for token_count in rest.split(','):
+                            token_ind, count = token_count.split(':')
+                            token_counter[int(token_ind)] = int(count)
+                        docword[repo_name] = token_counter
 
             self._docword[ind] = docword
 
