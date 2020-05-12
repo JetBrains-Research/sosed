@@ -4,8 +4,9 @@ import numpy as np
 
 from pathlib import Path
 from collections import Counter
+from unittest.mock import patch
 
-from similar_repositories.data_processing import ProcessedData
+from similar_repositories.data_processing import ProcessedData, assign_clusters
 
 
 class ProcessedDataTest(unittest.TestCase):
@@ -84,6 +85,41 @@ class ProcessedDataTest(unittest.TestCase):
         vectors_file = cls.folder / 'repo_vectors.npy'
         if vectors_file.exists():
             os.remove(vectors_file)
+
+
+class DataProcessingTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.folder = Path('test_data', 'test_data')
+        cls.tokens_file = cls.folder / 'tokens.txt'
+        cls.clusters_file = cls.folder / 'clusters.npy'
+        cls.real_tokens = ['we', 'are', 'the', 'champions', 'my', 'friends', 'and', 'keep', 'on', 'fighting', 'till', 'end']
+        cls.real_clusters = np.arange(len(cls.real_tokens))
+        cls.short_tokens = cls.real_tokens[::2]
+        cls.short_clusters = cls.real_clusters[::2]
+        np.save(cls.folder / 'clusters', cls.short_clusters, allow_pickle=True)
+
+    @patch('similar_repositories.data_processing.get_clusters_file')
+    @patch('similar_repositories.data_processing.get_tokens_file')
+    def test_assign_clusters(self, mock_get_tokens_file, mock_get_clusters_file):
+        mock_get_clusters_file.return_value = self.clusters_file
+        mock_get_tokens_file.return_value = self.tokens_file
+
+        tokens_vocab = {token: i for i, token in enumerate(self.real_tokens)}
+        proper_assignment = {ind: None for ind in tokens_vocab.values()}
+        proper_assignment.update({
+            tokens_vocab[token]: cluster
+            for token, cluster in zip(self.short_tokens, self.short_clusters) if token in tokens_vocab
+        })
+        print(proper_assignment)
+        self.assertEqual(proper_assignment, assign_clusters(tokens_vocab))
+
+    @classmethod
+    def tearDownClass(cls):
+        clusters_file = cls.clusters_file
+        if clusters_file.exists():
+            os.remove(clusters_file)
 
 
 if __name__ == '__main__':
