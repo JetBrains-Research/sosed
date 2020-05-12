@@ -35,6 +35,8 @@ conda env create --file conda_env.yml
 conda activate test-env
 ```
 
+#### Running the tool
+
 * Download and setup tokenizer (approx. 300 MB of grammars for tree-sitter):
 
 ```shell script
