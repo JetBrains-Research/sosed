@@ -43,7 +43,7 @@ conda activate test-env
 python3 -m similar_repositories.setup_tokenizer
 ```
 
-* List links to repositories in an input file (see [test_data](test_data) for examples).
+* List links to repositories in an input file (see [input_examples](input_examples) for examples).
 * Run the tool. On the first run it will download several files with data (approx. 370 MB archived, 960 MB upacked):
 ```shell script
 python3 -m similar_repositories.run -i input_examples/input.txt -o output
