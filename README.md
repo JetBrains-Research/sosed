@@ -1,3 +1,5 @@
+![ubuntu installation](https://github.com/JetBrains-Research/similar-repositories/workflows/ubuntu%20installation/badge.svg)
+
 # Similar projects search
 
 An embedding-based approach to detect simliar repositories on GitHub.
