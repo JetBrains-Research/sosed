@@ -34,11 +34,11 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest
-#     - name: Setup tokenizer
-#       run: |
-#         # Download tokenizer and its dependencies
-#         python -m similar_repositories.setup_tokenizer
-#     - name: Run integration test
-#       run: |
-#         pytest
+        pytest similar_repositories_test/test_data_processing.py
+    - name: Setup tokenizer
+      run: |
+        # Download tokenizer and its dependencies
+        python -m similar_repositories.setup_tokenizer
+    - name: Run integration test
+      run: |
+        pytest similar_repositories_test/test_pipeline.py
