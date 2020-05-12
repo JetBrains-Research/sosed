@@ -52,7 +52,7 @@ python3 -m similar_repositories.run -i input_examples/input.txt -o output
 ## Advanced options
 
 1. `-f`, `--force` &ndash; if passed, all stages will be re-run, otherwise stored intermediate data will be used (if exists).
-2. `-s`, `--min_stars` &ndash; search for similar projects among those with at least `min_stars` stars. 
+2. `-s`, `--min_stars` &ndash; searching for similar projects among those with at least `min_stars` stars. 
 Available options are 10, 50, 100. 0 and 1 are coming soon. Default is 100.
 3. `-k`, `--closest` &ndash; number of closest repositories to print. Default is 10.
 4. `-b`, `--batches` &ndash; number of projects that are tokenized together and stored to one file. Default is 100.
