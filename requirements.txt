@@ -1,0 +1,10 @@
+Cython>=0.29.17
+faiss>=1.6.3
+gdown>=3.11.0
+joblib>=0.14.1
+numpy>=1.18.1
+Pygments>=2.6.1
+PyStemmer>=2.0.0.1
+pytest>=5.4.1
+tqdm>=4.46.0
+tree-sitter>=0.1.1
