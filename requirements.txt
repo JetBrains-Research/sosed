@@ -1,5 +1,5 @@
 Cython>=0.29.17
-faiss>=1.6.3
+faiss-cpu>=1.6.3
 gdown>=3.11.0
 joblib>=0.14.1
 numpy>=1.18.1
