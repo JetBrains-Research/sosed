@@ -1,6 +1,7 @@
 name: similar-repositories-env
 channels:
   - defaults
+  - anaconda
   - pytorch
 dependencies:
   - python=3.7
@@ -10,6 +11,7 @@ dependencies:
   - cython
   - numpy
   - faiss-cpu
+  - pytest
   - pip
   - pip:
     - PyStemmer
