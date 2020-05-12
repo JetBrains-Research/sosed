@@ -165,7 +165,6 @@ class DataProcessingTest(unittest.TestCase):
         for i, inds in enumerate(idx):
             self.assertEqual(i, inds[0])
 
-
     @classmethod
     def tearDownClass(cls):
         clusters_file = cls.clusters_file
