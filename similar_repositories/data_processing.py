@@ -9,6 +9,10 @@ from tqdm import tqdm
 
 from .utils import get_clusters_file, get_tokens_file, embedding_dim
 
+__all__ = [
+    'ProcessedData',
+    'assign_clusters', 'compute_vectors', 'normalize_vectors', 'build_similarity_index', 'get_top_supertokens'
+]
 
 class ProcessedData:
     """

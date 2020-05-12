@@ -5,8 +5,7 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
 from .utils import mkdir, get_project_names, get_project_vectors
-from .data_processing import ProcessedData, assign_clusters, compute_vectors, normalize_vectors, build_similarity_index, \
-    get_top_supertokens
+from .data_processing import *
 from tokenizer.topic_dynamics.run import main as run_tokenizer
 
 

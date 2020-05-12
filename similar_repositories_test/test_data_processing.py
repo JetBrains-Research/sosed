@@ -6,7 +6,7 @@ from pathlib import Path
 from collections import Counter
 from unittest.mock import patch
 
-from similar_repositories.data_processing import ProcessedData, assign_clusters, compute_vectors, normalize_vectors, build_similarity_index
+from similar_repositories.data_processing import *
 
 
 class ProcessedDataTest(unittest.TestCase):
