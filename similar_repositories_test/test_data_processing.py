@@ -6,7 +6,7 @@ from pathlib import Path
 from collections import Counter
 from unittest.mock import patch
 
-from similar_repositories.data_processing import ProcessedData, assign_clusters
+from similar_repositories.data_processing import ProcessedData, assign_clusters, compute_vectors, normalize_vectors, build_similarity_index
 
 
 class ProcessedDataTest(unittest.TestCase):
@@ -112,8 +112,59 @@ class DataProcessingTest(unittest.TestCase):
             tokens_vocab[token]: cluster
             for token, cluster in zip(self.short_tokens, self.short_clusters) if token in tokens_vocab
         })
-        print(proper_assignment)
         self.assertEqual(proper_assignment, assign_clusters(tokens_vocab))
+
+    @patch('similar_repositories.data_processing.embedding_dim')
+    def test_compute_vectors(self, mock_embedding_dim):
+        n_projects = 3
+        dim = 8
+
+        mock_embedding_dim.return_value = dim
+
+        actual_repo_names = [f'project_{i}' for i in range(1, n_projects + 1)]
+        tokens_to_clusters = {i: i % dim for i in range(dim * dim)}
+        docword = {
+            project: Counter({token: i + 1 for token in tokens_to_clusters})
+            for i, project in enumerate(actual_repo_names)
+        }
+        actual_vectors = np.array([[i * dim for _ in range(dim)] for i in range(1, n_projects + 1)], dtype=np.float32)
+
+        repo_names, vectors = compute_vectors(docword, tokens_to_clusters)
+
+        self.assertEqual(actual_repo_names, repo_names)
+        self.assertEqual((n_projects, dim), vectors.shape)
+        self.assertTrue(np.all(actual_vectors == vectors))
+
+    def test_normalize_vectors(self):
+        n_projects = 3
+        dim = 8
+
+        vectors = np.random.randn(n_projects, dim)
+        normalized_vectors = normalize_vectors(vectors)
+
+        self.assertEqual((n_projects, dim), normalized_vectors.shape)
+        for vec, norm_vec in zip(vectors, normalized_vectors):
+            actual_norm_vec = vec / np.linalg.norm(vec)
+            for i in range(dim):
+                self.assertAlmostEqual(actual_norm_vec[i], norm_vec[i])
+
+    @patch('similar_repositories.data_processing.embedding_dim')
+    def test_similarity_index(self, mock_embedding_dim):
+        n_projects = 10
+        dim = 16
+
+        mock_embedding_dim.return_value = dim
+
+        embedding = np.random.random((n_projects, dim)).astype('float32')
+        embedding[:, 0] += np.arange(n_projects) / 1000.
+        embedding = normalize_vectors(embedding)
+
+        index = build_similarity_index(embedding)
+        dist, idx = index.search(embedding, 3)
+
+        for i, inds in enumerate(idx):
+            self.assertEqual(i, inds[0])
+
 
     @classmethod
     def tearDownClass(cls):
