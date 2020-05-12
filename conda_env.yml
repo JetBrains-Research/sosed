@@ -1,4 +1,4 @@
-name: test-env
+name: similar-repositories-env
 channels:
   - defaults
   - pytorch
