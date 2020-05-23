@@ -11,7 +11,8 @@ from .utils import get_clusters_file, get_tokens_file, embedding_dim
 
 __all__ = [
     'ProcessedData',
-    'assign_clusters', 'compute_vectors', 'normalize_vectors', 'build_similarity_index', 'get_top_supertokens'
+    'assign_clusters', 'compute_vectors', 'normalize_vectors', 'kl_vectors', 'smooth_vectors', 'probability_vectors',
+    'build_similarity_index', 'get_top_supertokens'
 ]
 
 class ProcessedData:
@@ -172,6 +173,20 @@ def compute_vectors(docword: Dict[str, Counter], tokens_to_clusters: Dict[int, i
 
 def normalize_vectors(vectors: np.ndarray) -> np.ndarray:
     return vectors / np.linalg.norm(vectors, axis=1, keepdims=True)
+
+
+def smooth_vectors(vectors: np.ndarray, smoothing_addition=1.) -> np.ndarray:
+    return vectors + smoothing_addition
+
+
+def probability_vectors(vectors: np.ndarray) -> np.ndarray:
+    return vectors / vectors.sum(axis=1, keepdims=True)
+
+
+def kl_vectors(vectors: np.ndarray, smoothing_addition=1.) -> np.ndarray:
+    vectors = smooth_vectors(vectors, smoothing_addition)
+    vectors = probability_vectors(vectors)
+    return -np.log(vectors)
 
 
 def build_similarity_index(embedding: np.ndarray) -> faiss.IndexFlatIP:

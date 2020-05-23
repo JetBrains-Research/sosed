@@ -64,12 +64,29 @@ def vectorize(processed_data: ProcessedData, force: bool) -> None:
     processed_data.store_repo_vectors(all_vectors)
 
 
-def analyze(processed_data: ProcessedData, min_stars: int, closest: int, explain: bool) -> None:
-    repo_names = processed_data.load_repo_names()
-    repo_vectors = normalize_vectors(processed_data.load_repo_vectors())
+def analyze(processed_data: ProcessedData, min_stars: int, closest: int, explain: bool, metric: str) -> None:
+    """
+    Find similar projects for repositories based on their numerical representations.
+    :param processed_data: wrapper for directory with numerical representations of projects.
+    :param min_stars: threshold for the number of stars for reference repositories.
+    :param closest: number of similar projects to output.
+    :param explain: whether to output explanation of project similarity.
+    :param metric: either `kl` or `cosine`, a way to compute project similarity. `kl` sorts projects based on the
+    KL-divergence of their topic distributions. `cosine` sorts projects based on the cosine similarity of their
+    representaitons.
+    :return:
+    """
+    if metric == 'kl':
+        project_embed = kl_vectors(get_project_vectors(min_stars))
+        repo_vectors = probability_vectors(smooth_vectors(processed_data.load_repo_vectors()))
+    elif metric == 'cosine':
+        project_embed = normalize_vectors(get_project_vectors(min_stars))
+        repo_vectors = normalize_vectors(processed_data.load_repo_vectors())
+    else:
+        raise ValueError('Metric should be either "kl" or "cosine"')
 
+    repo_names = processed_data.load_repo_names()
     project_names = get_project_names(min_stars)
-    project_embed = get_project_vectors(min_stars)
 
     index = build_similarity_index(project_embed)
 
@@ -89,8 +106,6 @@ def analyze(processed_data: ProcessedData, min_stars: int, closest: int, explain
                 print()
 
         print('-----------------------')
-        print()
-
 
 
 if __name__ == "__main__":
@@ -110,9 +125,11 @@ if __name__ == "__main__":
                         help="Number of closest repositories to find.")
     parser.add_argument("-e", "--explain", action="store_true",
                         help="If passed, the output will contain top super-tokens matched with each repository.")
+    parser.add_argument("-m", "--metric", default="kl",
+                        help="Metric to compute project similarity. Options are 'kl' (default) and 'cosine'")
     args = parser.parse_args()
 
     tokenize(args.input, args.output, args.batches, args.force)
     processed_data = ProcessedData(Path(args.output))
     vectorize(processed_data, args.force)
-    analyze(processed_data, args.min_stars, args.closest, args.explain)
+    analyze(processed_data, args.min_stars, args.closest, args.explain, args.metric)
