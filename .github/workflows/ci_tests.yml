@@ -5,7 +5,7 @@ name: ubuntu installation
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, test_speed ]
   pull_request:
     branches: [ master ]
 
