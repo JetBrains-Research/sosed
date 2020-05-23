@@ -57,3 +57,4 @@ python3 -m similar_repositories.run -i input_examples/input.txt -o output
 Available options are 10, 50, 100. 0 and 1 are coming soon. Default is 100.
 3. `-k`, `--closest` &ndash; number of closest repositories to print. Default is 10.
 4. `-b`, `--batches` &ndash; number of projects that are tokenized together and stored to one file. Default is 100.
+5. `-m`, `--metric` &ndash; a method to compute project similarity, either `kl` or `cosine`
