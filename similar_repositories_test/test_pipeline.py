@@ -17,10 +17,11 @@ class PipelineTest(unittest.TestCase):
     def test_pipeline(self):
         min_stars = 50
         k = 9
+        metric = 'cosine'
 
         os.system(
             f'python3 -m similar_repositories.run '
-            f'-i {self.input_file} -o {self.output_dir} -k {k} -s {min_stars} '
+            f'-i {self.input_file} -o {self.output_dir} -k {k} -s {min_stars} -m {metric}'
             f'> {self.output_file}'
         )
 
