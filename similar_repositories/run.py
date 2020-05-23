@@ -6,14 +6,15 @@ from pathlib import Path
 
 from .utils import mkdir, get_project_names, get_project_vectors
 from .data_processing import *
-from tokenizer.topic_dynamics.run import main as run_tokenizer
+from tokenizer.identifiers_extractor.run import main as run_tokenizer
 
 
-def tokenize(input_file: str, output_dir: str, batches: int, force: bool) -> None:
+def tokenize(input_file: str, output_dir: str, batches: int, local: str, force: bool) -> None:
     """
     :param input_file: input file with a list of links to projects for analysis.
     :param output_dir: directory to store data during tokenizing.
     :param batches: size of project batches that are saved to one file.
+    :param local: if True, input file should contain paths to local projects.
     :param force: if True, tokenizer will re-run (even if results have been stored previously).
     :return: None.
     """
@@ -30,7 +31,7 @@ def tokenize(input_file: str, output_dir: str, batches: int, force: bool) -> Non
     if not os.path.exists(input_file):
         raise ValueError(f'Input file {input_file} does not exist!')
 
-    tokenizer_args = Namespace(input=input_file, output=output_dir, batches=batches)
+    tokenizer_args = Namespace(input=input_file, output=output_dir, batches=batches, local=local)
     print(f'Running tokenizer on repos listed in {input_file}')
     run_tokenizer(tokenizer_args)
 
@@ -114,6 +115,9 @@ if __name__ == "__main__":
                         help="Full path to the input file with a list of links to GitHub.")
     parser.add_argument("-o", "--output", required=True,
                         help="Full path to the directory for storing extracted data.")
+    parser.add_argument("-l", "--local", action="store_true",
+                        help="If passed, switches the tokenization into the local mode, where "
+                             "the input list must contain paths to local directories.")
     parser.add_argument("-b", "--batches", default=100, type=int,
                         help="The size of the batch of projects that are saved to one file.")
     parser.add_argument("-f", "--force", action="store_true",
@@ -129,7 +133,7 @@ if __name__ == "__main__":
                         help="Metric to compute project similarity. Options are 'kl' (default) and 'cosine'")
     args = parser.parse_args()
 
-    tokenize(args.input, args.output, args.batches, args.force)
+    tokenize(args.input, args.output, args.batches, args.local, args.force)
     processed_data = ProcessedData(Path(args.output))
     vectorize(processed_data, args.force)
     analyze(processed_data, args.min_stars, args.closest, args.explain, args.metric)
