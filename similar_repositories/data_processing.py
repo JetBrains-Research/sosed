@@ -186,7 +186,7 @@ def probability_vectors(vectors: np.ndarray) -> np.ndarray:
 def kl_vectors(vectors: np.ndarray, smoothing_addition=1.) -> np.ndarray:
     vectors = smooth_vectors(vectors, smoothing_addition)
     vectors = probability_vectors(vectors)
-    return -np.log(vectors)
+    return np.log(vectors)
 
 
 def build_similarity_index(embedding: np.ndarray) -> faiss.IndexFlatIP:
