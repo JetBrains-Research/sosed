@@ -52,7 +52,7 @@ class ProcessedDataTest(unittest.TestCase):
         cls.processed_data = ProcessedData(cls.folder)
 
     def test_indices(self):
-        self.assertEqual(self.actual_index, self.processed_data.indices())
+        self.assertEqual(sorted(self.actual_index), sorted(self.processed_data.indices()))
 
     def test_docword(self):
         self.assertEqual(self.actual_docword[0], self.processed_data.load_docword(0))
