@@ -8,7 +8,8 @@ DIM = 256
 
 TOKENIZER_DIR = Path('tokenizer')
 TOKENIZER_URL = 'https://github.com/JetBrains-Research/identifiers-extractor.git'
-TOKENIZER_VERSION = 'v1.0.0'
+TOKENIZER_VERSION = 'platform_support'
+# TOKENIZER_VERSION = 'v1.0.0'
 
 DATA_LINK = 'https://drive.google.com/uc?id=1CTO24nZtMyHVQ43mhljfH2qN_QWNIZGo'
 DATA_ARCHIVE = 'data.tar.gz'
