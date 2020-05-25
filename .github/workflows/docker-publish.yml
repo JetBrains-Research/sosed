@@ -29,3 +29,47 @@ jobs:
           repository: egorbogomolov/similar-repositories
           tag_with_ref: true
           tag_with_sha: true
+
+  verify-image-unix:
+
+    needs: push
+
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest]
+
+      runs-on: ${{ matrix.platform }}
+
+      steps:
+      - uses: actions/checkout@v2
+      - name: Pull docker image
+        run: docker pull egorbogomolov/similar-repositories:latest
+      - name: Run the tool from docker
+          docker run \
+            --mount type=bind,source="$(pwd)"/input_examples,target=/input_examples/ \
+            --mount type=bind,source="$(pwd)"/output,target=/output/ \
+            --mount type=bind,source="$(pwd)"/data,target=/data \
+            egorbogomolov/similar-repositories:latest -i input_examples/input.txt -o output/examples_output/
+
+  verify-image-windows:
+
+    needs: push
+
+    strategy:
+      matrix:
+        platform: [windows-latest]
+
+      runs-on: ${{ matrix.platform }}
+
+      steps:
+        - uses: actions/checkout@v2
+        - name: Pull docker image
+          run: docker pull egorbogomolov/similar-repositories:latest
+        - name: Run the tool from docker
+            docker run \
+            --mount type=bind,source=%cd%\input_examples,target=/input_examples/ \
+            --mount type=bind,source=%cd%\output,target=/output/ \
+            --mount type=bind,source=%cd%\data,target=/data \
+            egorbogomolov/similar-repositories:latest -i input_examples/input.txt -o output/examples_output/
+
+
