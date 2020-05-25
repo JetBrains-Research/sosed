@@ -14,33 +14,18 @@ on:
   pull_request:
 
 jobs:
-  # Run tests.
-  # See also https://docs.docker.com/docker-hub/builds/automated-testing/
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Run tests
-        run: |
-          if [ -f docker-compose.test.yml ]; then
-            docker-compose --file docker-compose.test.yml build
-            docker-compose --file docker-compose.test.yml run sut
-          else
-            docker build . --file Dockerfile
-          fi
 
   push:
-    needs: test
 
     runs-on: ubuntu-latest
 
     steps:
-      - uses: docker/build-push-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: egorbogomolov/similar-repositories
-          tag_with_ref: true
-          tag_with_sha: true
+      - uses:
+          - actions/checkout@v2
+          - docker/build-push-action@v1
+            with:
+              username: ${{ secrets.DOCKER_USERNAME }}
+              password: ${{ secrets.DOCKER_PASSWORD }}
+              repository: egorbogomolov/similar-repositories
+              tag_with_ref: true
+              tag_with_sha: true
