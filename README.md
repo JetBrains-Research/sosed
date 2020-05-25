@@ -59,16 +59,21 @@ python3 -m similar_repositories.run -i input_examples/input.txt -o output
 
 ### Run the project from Docker (all platforms)
 
-* Load docker image
+* Pull docker image
+```shell script
+docker pull egorbogomolov/similar-repositories:latest
+```
+
 * When running the docker container, bind `input`, `output`, and `data` directories in order to cache both auxiliary
- and output data, and inspect the output afterwards (e.g., check the vocabulary for analyzed projects):
+ and output data, and inspect the output afterwards (e.g., check the vocabulary for analyzed projects). For Windows users,
+ you should change the 
 
 ```shell script
 docker run \
   --mount type=bind,source="$(pwd)"/input_examples,target=/input_examples/ \
   --mount type=bind,source="$(pwd)"/output,target=/output/ \
   --mount type=bind,source="$(pwd)"/data,target=/data \
-  similar-repos:latest -i input_examples/input.txt -o output/examples_output/
+  egorbogomolov/similar-repositories:latest -i input_examples/input.txt -o output/examples_output/
 ```
 
 ## Advanced options
