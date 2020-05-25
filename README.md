@@ -20,6 +20,13 @@ behind this idea is that for repositories with similar topics the distribution o
 
 ## Getting started
 
+To run the tool, clone this project 
+```
+git clone https://github.com/JetBrains-Research/similar-repositories.git
+```
+
+### Run the project from source (Linux & macOS)
+
 #### Pip users
 * Install required dependencies
 
@@ -48,6 +55,20 @@ python3 -m similar_repositories.setup_tokenizer
 * Run the tool. On the first run it will download several files with data (approx. 370 MB archived, 960 MB upacked):
 ```shell script
 python3 -m similar_repositories.run -i input_examples/input.txt -o output
+```
+
+### Run the project from Docker (all platforms)
+
+* Load docker image
+* When running the docker container, bind `input`, `output`, and `data` directories in order to cache both auxiliary
+ and output data, and inspect the output afterwards (e.g., check the vocabulary for analyzed projects):
+
+```shell script
+docker run \
+  --mount type=bind,source="$(pwd)"/input_examples,target=/input_examples/ \
+  --mount type=bind,source="$(pwd)"/output,target=/output/ \
+  --mount type=bind,source="$(pwd)"/data,target=/data \
+  similar-repos:latest -i input_examples/input.txt -o output/examples_output/
 ```
 
 ## Advanced options
