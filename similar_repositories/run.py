@@ -112,9 +112,9 @@ def analyze(processed_data: ProcessedData, min_stars: int, closest: int, explain
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("-i", "--input", required=True,
-                        help="Full path to the input file with a list of links to GitHub.")
+                        help="Path to the input file with a list of links to GitHub.")
     parser.add_argument("-o", "--output", required=True,
-                        help="Full path to the directory for storing extracted data.")
+                        help="Path to the directory for storing extracted data.")
     parser.add_argument("-l", "--local", action="store_true",
                         help="If passed, switches the tokenization into the local mode, where "
                              "the input list must contain paths to local directories.")
