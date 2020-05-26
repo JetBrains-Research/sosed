@@ -17,8 +17,8 @@ jobs:
 
   debug:
     runs-on: ubuntu-latest
+    shell: bash
     steps:
-      shell: bash
       run: |
         echo ${pwd}
         echo "${pwd}"/input_examples
