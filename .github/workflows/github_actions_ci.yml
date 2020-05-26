@@ -1,16 +1,19 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Linux & MacOS CI
+name: Linux, MacOS, Docker
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+    tags:
+      - v*
   pull_request:
-    branches: [ master ]
 
 jobs:
   build:
+
     strategy:
       matrix:
         platform: [ubuntu-latest, macos-latest]
@@ -45,3 +48,38 @@ jobs:
     - name: Run integration test
       run: |
         pytest similar_repositories_test/test_pipeline.py
+
+  push:
+
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: docker/build-push-action@v1
+        name: Build & push Docker image
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: egorbogomolov/similar-repositories
+          tag_with_ref: true
+          tag_with_sha: true
+
+  verify-image-unix:
+
+    needs: push
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Pull docker image
+      run: docker pull egorbogomolov/similar-repositories:latest
+    - name: Run the tool from docker
+      shell: bash
+      run: docker run \
+          --mount type=bind,source="$(pwd)"/input_examples,target=/input_examples/ \
+          --mount type=bind,source="$(pwd)"/output,target=/output/ \
+          --mount type=bind,source="$(pwd)"/data,target=/data \
+          egorbogomolov/similar-repositories:latest -i input_examples/input.txt -o output/examples_output/
