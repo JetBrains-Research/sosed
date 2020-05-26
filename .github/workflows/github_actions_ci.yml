@@ -18,14 +18,15 @@ jobs:
   debug:
     runs-on: ubuntu-latest
     steps:
-    - shell: bash
-      run: |
-        echo ${pwd}
-        echo "${pwd}"/input_examples
-        echo $(pwd)
-        echo "$(pwd)"/input_examples
-        echo `pwd`
-        echo "`pwd`/input_examples"
+      - uses: actions/checkout@v2
+      - shell: bash
+        run: |
+          echo ${pwd}
+          echo "${pwd}"/input_examples
+          echo $(pwd)
+          echo "$(pwd)"/input_examples
+          echo `pwd`
+          echo "`pwd`/input_examples"
 
 
 #  build:
