@@ -1,5 +1,6 @@
 [![JetBrains Research](https://jb.gg/badges/research.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 ![Linux & MacOS CI](https://github.com/JetBrains-Research/similar-repositories/workflows/Linux%20&%20MacOS%20CI/badge.svg)
+![Docker CI](https://github.com/JetBrains-Research/similar-repositories/workflows/Docker%20CI/badge.svg)
 
 # Similar projects search
 
