@@ -1,5 +1,5 @@
-[![JetBrains Research](https://jb.gg/badges/research.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
-![Linux, MacOS, Docker](https://github.com/JetBrains-Research/similar-repositories/workflows/Linux,%20MacOS,%20Docker/badge.svg)
+[![JetBrains Research](https://jb.gg/badges/research.svg)](https://research.jetbrains.org/groups/ml_methods)
+[![Linux, MacOS, Docker](https://github.com/JetBrains-Research/similar-repositories/workflows/Linux,%20MacOS,%20Docker/badge.svg)](https://github.com/JetBrains-Research/similar-repositories/actions?query=workflow%3A%22Linux%2C+MacOS%2C+Docker%22)
 
 # Similar projects search
 
