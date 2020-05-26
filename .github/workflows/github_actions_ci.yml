@@ -27,7 +27,6 @@ jobs:
           echo "$(pwd)"/input_examples
           echo `pwd`
           echo "`pwd`/input_examples"
-          - name: Pull docker image
       - name: Pull Docker image
         run: docker pull egorbogomolov/similar-repositories:latest
       - name: Run the tool from Docker
