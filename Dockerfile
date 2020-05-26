@@ -1,6 +1,6 @@
 FROM python:3.8-slim
 
-# gcc required by tree-sitter
+# g++ required by tree-sitter
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends g++
 
