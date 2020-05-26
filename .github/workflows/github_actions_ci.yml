@@ -54,6 +54,8 @@ jobs:
 
   push:
 
+    if: github.event_name != 'pull_request'
+
     needs: build
 
     runs-on: ubuntu-latest
@@ -70,6 +72,8 @@ jobs:
           tag_with_sha: true
 
   verify-image-unix:
+
+    if: github.event_name != 'pull_request'
 
     needs: push
 

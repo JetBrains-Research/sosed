@@ -1,5 +1,5 @@
-[![JetBrains Research](https://jb.gg/badges/research.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
-![Linux, MacOS, Docker](https://github.com/JetBrains-Research/similar-repositories/workflows/Linux,%20MacOS,%20Docker/badge.svg)
+[![JetBrains Research](https://jb.gg/badges/research.svg)](https://research.jetbrains.org/groups/ml_methods)
+[![Linux, MacOS, Docker](https://github.com/JetBrains-Research/similar-repositories/workflows/Linux,%20MacOS,%20Docker/badge.svg)](https://github.com/JetBrains-Research/similar-repositories/actions?query=workflow%3A%22Linux%2C+MacOS%2C+Docker%22)
 
 # Similar projects search
 
@@ -60,21 +60,19 @@ python3 -m similar_repositories.run -i input_examples/input.txt -o output
 ### Run the project from Docker (all platforms)
 
 * Pull docker image
-```shell script
-docker pull egorbogomolov/similar-repositories:latest
-```
+  ```shell script
+  docker pull egorbogomolov/similar-repositories:latest
+  ```
 
-* When running the docker container, bind `input`, `output`, and `data` directories in order to cache both auxiliary
- and output data, and inspect the output afterwards (e.g., check the vocabulary for analyzed projects). For Windows users,
- you should change the 
+* Map `input`, `output`, and `data` directories from inside the container to the local filesystem, to cache both auxiliary and output data. This allows to inspect the output afterwards (e.g., check the vocabulary for analyzed projects) outside the container
 
-```shell script
-docker run \
-  --mount type=bind,source="$(pwd)"/input_examples,target=/input_examples/ \
-  --mount type=bind,source="$(pwd)"/output,target=/output/ \
-  --mount type=bind,source="$(pwd)"/data,target=/data \
-  egorbogomolov/similar-repositories:latest -i input_examples/input.txt -o output/examples_output/
-```
+  ```shell script
+  docker run \
+    -v "$(pwd)"/input_examples:/input_examples/ \
+    -v "$(pwd)"/output:/output/ \
+    -v "$(pwd)"/data:/data \
+    egorbogomolov/similar-repositories:latest -i input_examples/input.txt -o output/examples_output/
+  ```
 
 ## Advanced options
 
