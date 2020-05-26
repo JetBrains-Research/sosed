@@ -42,7 +42,7 @@ jobs:
       run: docker pull egorbogomolov/similar-repositories:latest
     - name: Run the tool from docker
       run: docker run \
-          --mount type=bind,source="$(pwd)"/input_examples,target=/input_examples/ \
-          --mount type=bind,source="$(pwd)"/output,target=/output/ \
-          --mount type=bind,source="$(pwd)"/data,target=/data \
+          --mount type=bind,source="${pwd}"/input_examples,target=/input_examples/ \
+          --mount type=bind,source="${pwd}"/output,target=/output/ \
+          --mount type=bind,source="${pwd}"/data,target=/data \
           egorbogomolov/similar-repositories:latest -i input_examples/input.txt -o output/examples_output/
