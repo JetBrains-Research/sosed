@@ -65,7 +65,9 @@ def vectorize(processed_data: ProcessedData, force: bool) -> None:
     processed_data.store_repo_vectors(all_vectors)
 
 
-def analyze(processed_data: ProcessedData, min_stars: int, closest: int, explain: bool, metric: str) -> None:
+def analyze(
+        processed_data: ProcessedData, min_stars: int, closest: int, explain: bool, metric: str, language: str
+) -> None:
     """
     Find similar projects for repositories based on their numerical representations.
     :param processed_data: wrapper for directory with numerical representations of projects.
@@ -75,19 +77,26 @@ def analyze(processed_data: ProcessedData, min_stars: int, closest: int, explain
     :param metric: either `kl` or `cosine`, a way to compute project similarity. `kl` sorts projects based on the
     KL-divergence of their topic distributions. `cosine` sorts projects based on the cosine similarity of their
     representaitons.
+    :param language: if not None, analysis uses only projects with this language.
     :return:
     """
+    project_vectors = get_project_vectors(min_stars)
+    project_names = get_project_names(min_stars)
+    if language is not None:
+        project_vectors, project_names = filter_by_language(project_vectors, project_names, language, min_stars)
+        if len(project_vectors) == 0:
+            raise ValueError(f"There are no projects for language {language}")
+
     if metric == 'kl':
-        project_embed = kl_vectors(get_project_vectors(min_stars))
+        project_embed = kl_vectors(project_vectors)
         repo_vectors = probability_vectors(smooth_vectors(processed_data.load_repo_vectors()))
     elif metric == 'cosine':
-        project_embed = normalize_vectors(get_project_vectors(min_stars))
+        project_embed = normalize_vectors(project_vectors)
         repo_vectors = normalize_vectors(processed_data.load_repo_vectors())
     else:
         raise ValueError('Metric should be either "kl" or "cosine"')
 
     repo_names = processed_data.load_repo_names()
-    project_names = get_project_names(min_stars)
 
     index = build_similarity_index(project_embed)
 
@@ -131,9 +140,13 @@ if __name__ == "__main__":
                         help="If passed, the output will contain top super-tokens matched with each repository.")
     parser.add_argument("-m", "--metric", default="kl",
                         help="Metric to compute project similarity. Options are 'kl' (default) and 'cosine'")
+    parser.add_argument("--lang", default=None, type=str,
+                        help="If passed, specifies the language of reference projects. "
+                             "Notice, that language data was extracted with GHTorrent and for some projects language "
+                             "information is missing.")
     args = parser.parse_args()
 
     tokenize(args.input, args.output, args.batches, args.local, args.force)
     processed_data = ProcessedData(Path(args.output))
     vectorize(processed_data, args.force)
-    analyze(processed_data, args.min_stars, args.closest, args.explain, args.metric)
+    analyze(processed_data, args.min_stars, args.closest, args.explain, args.metric, args.lang)
