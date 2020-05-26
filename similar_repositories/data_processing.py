@@ -7,12 +7,12 @@ from typing import Dict, List, Tuple
 from collections import Counter
 from tqdm import tqdm
 
-from .utils import get_clusters_file, get_tokens_file, embedding_dim
+from .utils import get_clusters_file, get_tokens_file, embedding_dim, get_project_languages
 
 __all__ = [
     'ProcessedData',
     'assign_clusters', 'compute_vectors', 'normalize_vectors', 'kl_vectors', 'smooth_vectors', 'probability_vectors',
-    'build_similarity_index', 'get_top_supertokens'
+    'build_similarity_index', 'get_top_supertokens', 'filter_by_language'
 ]
 
 class ProcessedData:
@@ -199,3 +199,14 @@ def get_top_supertokens(repo_vector: np.ndarray, index: faiss.IndexFlatIP, ind: 
     dot_product = index.reconstruct(ind) * repo_vector
     idx = reversed(np.argsort(dot_product)[-k:])
     return [(dim, dot_product[dim]) for dim in idx]
+
+
+def filter_by_language(
+        vectors: np.ndarray, project_names: List[str], language: str, min_stars: int
+) -> Tuple[np.ndarray, List[str]]:
+
+    languages = get_project_languages(min_stars)
+    indices = [i for i, lang in enumerate(languages) if lang == language]
+    filtered_vectors = vectors[indices]
+    filtered_names = [project_names[ind] for ind in indices]
+    return filtered_vectors, filtered_names
