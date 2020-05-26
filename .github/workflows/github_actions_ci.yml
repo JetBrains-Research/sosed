@@ -19,13 +19,13 @@ jobs:
     runs-on: ubuntu-latest
     shell: bash
     steps:
-      - run: |
-          echo ${pwd}
-          echo "${pwd}"/input_examples
-          echo $(pwd)
-          echo "$(pwd)"/input_examples
-          echo `pwd`
-          echo "`pwd`/input_examples"
+    - run: |
+        echo ${pwd}
+        echo "${pwd}"/input_examples
+        echo $(pwd)
+        echo "$(pwd)"/input_examples
+        echo `pwd`
+        echo "`pwd`/input_examples"
 
 
 #  build:
