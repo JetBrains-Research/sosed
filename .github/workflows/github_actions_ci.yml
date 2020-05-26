@@ -12,74 +12,88 @@ on:
   pull_request:
 
 jobs:
-  build:
 
-    strategy:
-      matrix:
-        platform: [ubuntu-latest, macos-latest]
-
-    runs-on: ${{ matrix.platform }}
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.8
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8 pytest
-        pip install cython
-        pip install -r requirements.txt
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
-      run: |
-        pytest similar_repositories_test/test_data_processing.py
-    - name: Setup tokenizer
-      run: |
-        # Download tokenizer and its dependencies
-        python -m similar_repositories.setup_tokenizer
-    - name: Run integration test
-      run: |
-        pytest similar_repositories_test/test_pipeline.py
-
-  push:
-
-    needs: build
-
+  debug:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2
-      - uses: docker/build-push-action@v1
-        name: Build & push Docker image
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: egorbogomolov/similar-repositories
-          tag_with_ref: true
-          tag_with_sha: true
-
-  verify-image-unix:
-
-    needs: push
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Pull docker image
-      run: docker pull egorbogomolov/similar-repositories:latest
-    - name: Run the tool from docker
       shell: bash
-      run: docker run \
-          --mount type=bind,source="$(pwd)"/input_examples,target=/input_examples/ \
-          --mount type=bind,source="$(pwd)"/output,target=/output/ \
-          --mount type=bind,source="$(pwd)"/data,target=/data \
-          egorbogomolov/similar-repositories:latest -i input_examples/input.txt -o output/examples_output/
+      run: |
+        echo ${pwd}
+        echo "${pwd}"/input_examples
+        echo $(pwd)
+        echo "$(pwd)"/input_examples
+        echo `pwd`
+        echo "`pwd`/input_examples"
+
+
+#  build:
+#
+#    strategy:
+#      matrix:
+#        platform: [ubuntu-latest, macos-latest]
+#
+#    runs-on: ${{ matrix.platform }}
+#
+#    steps:
+#    - uses: actions/checkout@v2
+#    - name: Set up Python 3.8
+#      uses: actions/setup-python@v1
+#      with:
+#        python-version: 3.8
+#    - name: Install dependencies
+#      run: |
+#        python -m pip install --upgrade pip
+#        pip install flake8 pytest
+#        pip install cython
+#        pip install -r requirements.txt
+#    - name: Lint with flake8
+#      run: |
+#        # stop the build if there are Python syntax errors or undefined names
+#        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+#        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+#        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+#    - name: Test with pytest
+#      run: |
+#        pytest similar_repositories_test/test_data_processing.py
+#    - name: Setup tokenizer
+#      run: |
+#        # Download tokenizer and its dependencies
+#        python -m similar_repositories.setup_tokenizer
+#    - name: Run integration test
+#      run: |
+#        pytest similar_repositories_test/test_pipeline.py
+#
+#  push:
+#
+#    needs: build
+#
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - uses: actions/checkout@v2
+#      - uses: docker/build-push-action@v1
+#        name: Build & push Docker image
+#        with:
+#          username: ${{ secrets.DOCKER_USERNAME }}
+#          password: ${{ secrets.DOCKER_PASSWORD }}
+#          repository: egorbogomolov/similar-repositories
+#          tag_with_ref: true
+#          tag_with_sha: true
+#
+#  verify-image-unix:
+#
+#    needs: push
+#
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#    - uses: actions/checkout@v2
+#    - name: Pull docker image
+#      run: docker pull egorbogomolov/similar-repositories:latest
+#    - name: Run the tool from docker
+#      shell: bash
+#      run: docker run \
+#          --mount type=bind,source="$(pwd)"/input_examples,target=/input_examples/ \
+#          --mount type=bind,source="$(pwd)"/output,target=/output/ \
+#          --mount type=bind,source="$(pwd)"/data,target=/data \
+#          egorbogomolov/similar-repositories:latest -i input_examples/input.txt -o output/examples_output/
