@@ -1,18 +1,19 @@
 import os
 import numpy as np
 import faiss
+import pickle
 
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Any
 from collections import Counter
 from tqdm import tqdm
 
-from .utils import get_clusters_file, get_tokens_file, embedding_dim, get_project_languages
+from .utils import get_clusters_file, get_tokens_file, embedding_dim, get_project_languages, stats_top_tokens
 
 __all__ = [
     'ProcessedData',
     'assign_clusters', 'compute_vectors', 'normalize_vectors', 'kl_vectors', 'smooth_vectors', 'probability_vectors',
-    'build_similarity_index', 'get_top_supertokens', 'filter_by_language'
+    'build_similarity_index', 'get_top_supertokens', 'filter_by_language', 'compute_repo_stats'
 ]
 
 class ProcessedData:
@@ -42,8 +43,10 @@ class ProcessedData:
 
         self._repo_names_file = folder / 'repo_names.txt'
         self._repo_vectors_file = folder / 'repo_vectors.npy'
+        self._repo_stats_file = folder / 'repo_stats.json'
         self._repo_names = None
         self._repo_vectors = None
+        self._repo_stats = None
 
     @staticmethod
     def _docword_index(filename: str) -> int:
@@ -114,11 +117,18 @@ class ProcessedData:
         self._repo_vectors = repo_vectors
         np.save(str(self._repo_vectors_file)[:-len('.npy')], repo_vectors, allow_pickle=True)
 
+    def store_repo_stats(self, repo_stats: Dict[str, Dict[str, Any]]) -> None:
+        self._repo_stats = repo_stats
+        pickle.dump(repo_stats, self._repo_stats_file.open('wb'))
+
     def has_stored_repo_names(self) -> bool:
         return self._repo_names_file.exists()
 
     def has_stored_repo_vectors(self) -> bool:
         return self._repo_vectors_file.exists()
+
+    def has_stored_repo_stats(self) -> bool:
+        return self._repo_stats_file.exists()
 
     def load_repo_names(self) -> List[str]:
         if self._repo_names is None:
@@ -129,6 +139,11 @@ class ProcessedData:
         if self._repo_vectors is None:
             self._repo_vectors = np.load(self._repo_vectors_file, allow_pickle=True)
         return self._repo_vectors
+
+    def load_repo_stats(self) -> Dict[str, Dict[str, Any]]:
+        if self._repo_stats is None:
+            self._repo_stats = pickle.load(self._repo_stats_file.open('rb'))
+        return self._repo_stats
 
 
 def assign_clusters(tokens_vocab: Dict[str, int]) -> Dict[int, int]:
@@ -210,3 +225,24 @@ def filter_by_language(
     filtered_vectors = vectors[indices]
     filtered_names = [project_names[ind] for ind in indices]
     return filtered_vectors, filtered_names
+
+
+def compute_repo_stats(
+        docword: Dict[str, Counter], tokens_to_clusters: Dict[int, int], tokens_vocab: Dict[str, int]
+) -> Dict[str, Dict[str, Any]]:
+    print(f'Extracting stats for {len(docword)} repositories')
+    repo_stats = {repo_name: {} for repo_name in docword}
+
+    inverse_vocab = {index: token for token, index in tokens_vocab.items()}
+
+    for repo_name, token_counts in docword.items():
+        repo_stats[repo_name]['top_tokens'] = [
+            (inverse_vocab[token], count) for token, count in token_counts.most_common(stats_top_tokens())
+        ]
+        repo_stats[repo_name]['top_by_cluster'] = [[] for cluster in range(embedding_dim())]
+        for token, count in token_counts.most_common():
+            cluster = tokens_to_clusters[token]
+            if cluster is not None and len(repo_stats[repo_name]['top_by_cluster'][cluster]) < stats_top_tokens():
+                repo_stats[repo_name]['top_by_cluster'][cluster].append((inverse_vocab[token], count))
+
+    return repo_stats

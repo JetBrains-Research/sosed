@@ -6,6 +6,8 @@ from pathlib import Path
 from typing import List
 
 DIM = 256
+# Number of tokens to keep in repository stats
+TOP_TOKENS = 5
 
 TOKENIZER_DIR = Path('tokenizer')
 TOKENIZER_URL = 'https://github.com/JetBrains-Research/identifiers-extractor.git'
@@ -25,6 +27,10 @@ REPO_LANGUAGES_FILES = {stars: f'repo_languages_{stars}.pkl' for stars in VALID_
 
 def embedding_dim() -> int:
     return DIM
+
+
+def stats_top_tokens() -> int:
+    return TOP_TOKENS
 
 
 def mkdir(path: str) -> None:

@@ -43,13 +43,16 @@ def vectorize(processed_data: ProcessedData, force: bool) -> None:
     :param force: if True, vectorization will re-run (even if results have been stored previously).
     :return: None.
     """
-    if not force and processed_data.has_stored_repo_names() and processed_data.has_stored_repo_vectors():
+    if not force and processed_data.has_stored_repo_names() \
+            and processed_data.has_stored_repo_vectors() \
+            and processed_data.has_stored_repo_stats():
         print(f'Found precomputed vectors in {processed_data.folder()}.\n'
               f'If you wan to re-run vector computation, pass --force flag.')
         return
 
     all_repo_names = []
     all_vectors_list = []
+    all_repo_stats = {}
 
     print(f'Found {len(processed_data.indices())} batches with tokenized data.')
     for ind in processed_data.indices():
@@ -57,12 +60,15 @@ def vectorize(processed_data: ProcessedData, force: bool) -> None:
         tokens_to_clusters = assign_clusters(vocab)
         docword = processed_data.load_docword(ind)
         repo_names, vectors = compute_vectors(docword, tokens_to_clusters)
+        repo_stats = compute_repo_stats(docword, tokens_to_clusters, vocab)
         all_repo_names += repo_names
         all_vectors_list.append(vectors)
+        all_repo_stats.update(repo_stats)
 
     all_vectors = np.concatenate(all_vectors_list)
     processed_data.store_repo_names(all_repo_names)
     processed_data.store_repo_vectors(all_vectors)
+    processed_data.store_repo_stats(all_repo_stats)
 
 
 def analyze(
@@ -97,6 +103,7 @@ def analyze(
         raise ValueError('Metric should be either "kl" or "cosine"')
 
     repo_names = processed_data.load_repo_names()
+    repo_stats = processed_data.load_repo_stats()
 
     index = build_similarity_index(project_embed)
 
@@ -105,14 +112,27 @@ def analyze(
     for repo_name, repo_vector, dist_vector, idx in zip(repo_names, repo_vectors, distances, indices):
         print()
         print('-----------------------')
-        print(f'Top picks for {repo_name}')
+        print(f'Query project: {repo_name}')
+
+        stats = repo_stats[repo_name]
+
+        if explain:
+            top_tokens = stats['top_tokens']
+            top_tokens_string = ', '.join([f'{token} ({count})' for token, count in top_tokens])
+            print(f'Most frequent tokens: {top_tokens_string}')
+            print()
+
         for ind, dist in zip(idx, dist_vector):
-            print(f'https://github.com/{project_names[ind]} | {dist:.4f}')
+            print(f'https://github.com/{project_names[ind]} | similarity = {dist:.4f}')
 
             if explain:
                 top_supertokens = get_top_supertokens(repo_vector, index, int(ind))
-                print('Top supertokens:')
-                print('\n'.join([f'{dim} : {product:.2f}' for dim, product in top_supertokens]))
+                print()
+                print('Intersecting topics:')
+                print('\n'.join([
+                    f'{dim:3d} | intersection = {product / dist:.2f} | {", ".join([f"{token}" for token, count in stats["top_by_cluster"][dim]])}'
+                    for dim, product in top_supertokens
+                ]))
                 print()
 
         print('-----------------------')
