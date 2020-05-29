@@ -17,7 +17,6 @@ DATA_LINK = 'https://s3-eu-west-1.amazonaws.com/resources.ml.labs.aws.intellij.n
 DATA_TC_ARCHIVE = 'data_tc.tar.xz'
 DATA_STARS_ARCHIVE = 'data_stars_{}.tar.xz'
 DATA_DIR = Path('data')
-DATA_TC_PATH = DATA_DIR / DATA_TC_ARCHIVE
 CLUSTERS_FILE = 'clusters.npy'
 CLUSTERS_INFO_FILE = 'clusters_info.pkl'
 TOKENS_FILE = 'tokens.txt'
@@ -44,21 +43,21 @@ def mkdir(path: str) -> None:
         raise ValueError(f'{path} is not a directory!')
 
 
-def download_data(min_stars: int = None) -> None:
+def download_tc_data() -> None:
     mkdir(DATA_DIR)
 
-    if not DATA_TC_PATH.exists():
-        os.system(f'wget {DATA_LINK.format(DATA_TC_ARCHIVE)}')
-        os.system(f'tar -xvf {DATA_TC_ARCHIVE} -C {DATA_DIR}')
-        os.remove(DATA_TC_ARCHIVE)
+    os.system(f'wget {DATA_LINK.format(DATA_TC_ARCHIVE)}')
+    os.system(f'tar -xvf {DATA_TC_ARCHIVE} -C {DATA_DIR}')
+    os.remove(DATA_TC_ARCHIVE)
 
-    if min_stars is not None:
-        data_stars = DATA_STARS_ARCHIVE.format(min_stars)
-        data_stars_path = DATA_DIR / data_stars
-        if not data_stars_path.exists():
-            os.system(f'wget {DATA_LINK.format(data_stars)}')
-            os.system(f'tar -xvf {data_stars} -C {DATA_DIR}')
-            os.remove(data_stars)
+
+def download_data(min_stars: int) -> None:
+    mkdir(DATA_DIR)
+
+    data_stars = DATA_STARS_ARCHIVE.format(min_stars)
+    os.system(f'wget {DATA_LINK.format(data_stars)}')
+    os.system(f'tar -xvf {data_stars} -C {DATA_DIR}')
+    os.remove(data_stars)
 
 
 def get_data_dir() -> Path:
@@ -70,7 +69,7 @@ def get_clusters_file() -> Path:
     filepath = get_data_dir() / CLUSTERS_FILE
 
     if not filepath.exists():
-        download_data()
+        download_tc_data()
 
     return filepath
 
@@ -79,7 +78,7 @@ def get_tokens_file() -> Path:
     filepath = get_data_dir() / TOKENS_FILE
 
     if not filepath.exists():
-        download_data()
+        download_tc_data()
 
     return filepath
 
