@@ -8,6 +8,7 @@ RUN apt-get install -y --no-install-recommends g++ git wget && \
 COPY requirements.txt .
 RUN pip install cython && pip install -r requirements.txt
 
+COPY data/clusters_info.pkl data/
 COPY similar_repositories/ similar_repositories/
 RUN python -m similar_repositories.setup_tokenizer
 RUN python -m tokenizer.identifiers_extractor.parsers
