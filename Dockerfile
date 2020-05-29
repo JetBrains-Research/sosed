@@ -2,7 +2,7 @@ FROM python:3.8-slim
 
 # g++ required by tree-sitter
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends g++ git wget && \
+RUN apt-get install -y --no-install-recommends g++ git wget xz-utils && \
     rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
