@@ -16,4 +16,3 @@ dependencies:
   - pip:
     - PyStemmer
     - tree_sitter
-    - gdown
