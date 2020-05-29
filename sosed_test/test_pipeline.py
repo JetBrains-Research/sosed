@@ -20,7 +20,7 @@ class PipelineTest(unittest.TestCase):
         metric = 'cosine'
 
         os.system(
-            f'python3 -m similar_repositories.run '
+            f'python3 -m sosed.run '
             f'-i {self.input_file} -o {self.output_dir} -k {k} -s {min_stars} -m {metric}'
             f'> {self.output_file}'
         )

@@ -1,5 +1,5 @@
 [![JetBrains Research](https://jb.gg/badges/research.svg)](https://research.jetbrains.org/groups/ml_methods)
-[![Linux, MacOS, Docker](https://github.com/JetBrains-Research/similar-repositories/workflows/Linux,%20MacOS,%20Docker/badge.svg)](https://github.com/JetBrains-Research/similar-repositories/actions?query=workflow%3A%22Linux%2C+MacOS%2C+Docker%22)
+[![Linux, MacOS, Docker](https://github.com/JetBrains-Research/sosed/workflows/Linux,%20MacOS,%20Docker/badge.svg)](https://github.com/JetBrains-Research/sosed/actions?query=workflow%3A%22Linux%2C+MacOS%2C+Docker%22)
 
 # *Sosed*, similar projects search
 
@@ -49,7 +49,7 @@ print their descriptions.
 
 To run the tool, clone this project 
 ```
-git clone https://github.com/JetBrains-Research/similar-repositories.git
+git clone https://github.com/JetBrains-Research/sosed.git
 ```
 
 ### Run the project from source (Linux & macOS)
@@ -67,7 +67,7 @@ pip install -r requirements.txt
 
 ```shell script
 conda env create --file conda_env.yml
-conda activate similar-repositories-env
+conda activate sosed-env
 ```
 
 #### Running the tool
@@ -75,21 +75,21 @@ conda activate similar-repositories-env
 * Download and setup tokenizer (approx. 75 MB of grammars for tree-sitter):
 
 ```shell script
-python3 -m similar_repositories.setup_tokenizer
+python3 -m sosed.setup_tokenizer
 ```
 
 * List links to GitHub repositories or paths to local projects in an input file (see [input_examples](input_examples) 
 for examples).
 * Run the tool. On the first run it will download several files with data (approx. 300 MB archived, 960 MB upacked):
 ```shell script
-python3 -m similar_repositories.run -i input_examples/input.txt -o output/output_example
+python3 -m sosed.run -i input_examples/input.txt -o output/output_example
 ```
 
 ### Run the project from Docker
 
 * Pull docker image
   ```shell script
-  docker pull egorbogomolov/similar-repositories:latest
+  docker pull egorbogomolov/sosed:latest
   ```
 
 * Map `input`, `output`, and `data` directories from inside the container to the local filesystem, to cache both 
@@ -101,7 +101,7 @@ projects) outside the container
     -v "$(pwd)"/input_examples:/input_examples/ \
     -v "$(pwd)"/output:/output/ \
     -v "$(pwd)"/data:/data \
-    egorbogomolov/similar-repositories:latest -i input_examples/input.txt -o output/examples_output/
+    egorbogomolov/sosed:latest -i input_examples/input.txt -o output/examples_output/
   ```
 
 ## Known issues
@@ -128,7 +128,7 @@ Available options are 0, 1, 10, 50, 100. Default is 100. For 0+ and 1+ options, 
 
 ### Example of usage with all the flags:
 ```shell script
-python3 -m similar_repositories.run \
+python3 -m sosed.run \
   -i input_examples/input.txt -o output_example \
   --local --force --min_stars 10 --closest 20 --batches 1000 --metric cosine --explain --lang Go
 ```

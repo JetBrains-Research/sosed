@@ -6,7 +6,7 @@ from pathlib import Path
 from collections import Counter
 from unittest.mock import patch
 
-from similar_repositories.data_processing import *
+from sosed.data_processing import *
 
 
 class ProcessedDataTest(unittest.TestCase):
@@ -100,8 +100,8 @@ class DataProcessingTest(unittest.TestCase):
         cls.short_clusters = cls.real_clusters[::2]
         np.save(cls.folder / 'clusters', cls.short_clusters, allow_pickle=True)
 
-    @patch('similar_repositories.data_processing.get_clusters_file')
-    @patch('similar_repositories.data_processing.get_tokens_file')
+    @patch('sosed.data_processing.get_clusters_file')
+    @patch('sosed.data_processing.get_tokens_file')
     def test_assign_clusters(self, mock_get_tokens_file, mock_get_clusters_file):
         mock_get_clusters_file.return_value = self.clusters_file
         mock_get_tokens_file.return_value = self.tokens_file
@@ -114,7 +114,7 @@ class DataProcessingTest(unittest.TestCase):
         })
         self.assertEqual(proper_assignment, assign_clusters(tokens_vocab))
 
-    @patch('similar_repositories.data_processing.embedding_dim')
+    @patch('sosed.data_processing.embedding_dim')
     def test_compute_vectors(self, mock_embedding_dim):
         n_projects = 3
         dim = 8
@@ -148,7 +148,7 @@ class DataProcessingTest(unittest.TestCase):
             for i in range(dim):
                 self.assertAlmostEqual(actual_norm_vec[i], norm_vec[i])
 
-    @patch('similar_repositories.data_processing.embedding_dim')
+    @patch('sosed.data_processing.embedding_dim')
     def test_similarity_index(self, mock_embedding_dim):
         n_projects = 10
         dim = 16
