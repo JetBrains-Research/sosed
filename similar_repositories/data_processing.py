@@ -228,7 +228,7 @@ def filter_by_language(
 ) -> Tuple[np.ndarray, List[str]]:
 
     languages = get_project_languages(min_stars)
-    indices = [i for i, lang in enumerate(languages) if lang == language]
+    indices = [i for i, lang in enumerate(languages) if lang.lower() == language.lower()]
     filtered_vectors = vectors[indices]
     filtered_names = [project_names[ind] for ind in indices]
     return filtered_vectors, filtered_names
