@@ -4,7 +4,7 @@ import numpy as np
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
-from .utils import mkdir, get_project_names, get_project_vectors
+from .utils import mkdir, get_project_names, get_project_vectors, get_clusters_info
 from .data_processing import *
 from tokenizer.identifiers_extractor.run import main as run_tokenizer
 
@@ -104,6 +104,7 @@ def analyze(
 
     repo_names = processed_data.load_repo_names()
     repo_stats = processed_data.load_repo_stats()
+    clusters_info = get_clusters_info()
 
     index = build_similarity_index(project_embed)
 
@@ -119,18 +120,26 @@ def analyze(
         if explain:
             top_tokens = stats['top_tokens']
             top_tokens_string = ', '.join([f'{token} ({count})' for token, count in top_tokens])
-            print(f'Most frequent tokens: {top_tokens_string}')
+            print()
+            print(f'Most frequent sub-tokens: {top_tokens_string}')
+            print(f'Top sub-token topics:')
+            top_topics = np.argsort(repo_vector)[-5:][::-1]
+            for dim in top_topics:
+                print(
+                    f'weight = {repo_vector[dim]:.2f} | {clusters_info[dim][0]:50s} | {", ".join([f"{token} ({count})" for token, count in stats["top_by_cluster"][dim]])}'
+                )
             print()
 
         for ind, dist in zip(idx, dist_vector):
             print(f'https://github.com/{project_names[ind]} | similarity = {dist:.4f}')
 
             if explain:
-                top_supertokens = get_top_supertokens(repo_vector, index, int(ind))
+                top_supertokens = get_top_supertokens(repo_vector, index, int(ind), metric)
                 print()
                 print('Intersecting topics:')
                 print('\n'.join([
-                    f'{dim:3d} | intersection = {product / dist:.2f} | {", ".join([f"{token}" for token, count in stats["top_by_cluster"][dim]])}'
+                    # f'{dim:3d} | intersection = {product / dist:.2f} | {", ".join([f"{token}" for token, count in stats["top_by_cluster"][dim]])}'
+                    f'intersection = {product / dist:.2f} | {clusters_info[dim][0]:50s} | {", ".join([f"{token}" for token in clusters_info[dim][1]])}'
                     for dim, product in top_supertokens
                 ]))
                 print()

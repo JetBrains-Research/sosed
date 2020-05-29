@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 DIM = 256
 # Number of tokens to keep in repository stats
@@ -17,6 +17,7 @@ DATA_LINK = 'https://drive.google.com/uc?id=1CTO24nZtMyHVQ43mhljfH2qN_QWNIZGo'
 DATA_ARCHIVE = 'data.tar.gz'
 DATA_DIR = Path('data')
 CLUSTERS_FILE = 'clusters.npy'
+CLUSTERS_INFO_FILE = 'clusters_info.pkl'
 TOKENS_FILE = 'tokens.txt'
 
 VALID_STARS = [10, 50, 100]
@@ -109,3 +110,9 @@ def get_project_languages(min_stars: int) -> List[str]:
         download_data()
 
     return pickle.load(open(filepath, 'rb'))
+
+
+def get_clusters_info() -> List[Tuple[str, List[str]]]:
+    filepath = DATA_DIR / CLUSTERS_INFO_FILE
+
+    return pickle.load(filepath.open('rb'))
