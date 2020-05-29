@@ -15,7 +15,7 @@ class PipelineTest(unittest.TestCase):
         cls.repo_names = [line.strip() for line in cls.input_file.open('r').readlines() if line.strip() != '']
 
     def test_pipeline(self):
-        min_stars = 50
+        min_stars = 100
         k = 9
         metric = 'cosine'
 
@@ -27,7 +27,7 @@ class PipelineTest(unittest.TestCase):
 
         encountered_repos = []
         similarities = []
-        block_header = 'Top picks for '
+        block_header = 'Query project: '
 
         output = [line.strip() for line in self.output_file.open('r').readlines()]
         for line in output:
@@ -35,7 +35,7 @@ class PipelineTest(unittest.TestCase):
                 encountered_repos.append(line[len(block_header):])
                 similarities.append([])
             elif line.startswith('https'):
-                similarities[-1].append(float(line.split(' | ')[1]))
+                similarities[-1].append(float(line.split(' | ')[1].split(' = ')[1]))
 
         self.assertEqual(self.repo_names, encountered_repos)
 
