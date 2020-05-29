@@ -1,4 +1,4 @@
-name: similar-repositories-env
+name: sosed-env
 channels:
   - defaults
   - anaconda
