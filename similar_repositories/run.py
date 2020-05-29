@@ -124,9 +124,12 @@ def analyze(
             print(f'Most frequent sub-tokens: {top_tokens_string}')
             print(f'Top sub-token topics:')
             top_topics = np.argsort(repo_vector)[-5:][::-1]
+            max_len = max(len(clusters_info[dim][0]) for dim in top_topics)
             for dim in top_topics:
                 print(
-                    f'weight = {repo_vector[dim]:.2f} | {clusters_info[dim][0]:50s} | {", ".join([f"{token} ({count})" for token, count in stats["top_by_cluster"][dim]])}'
+                    f'weight = {repo_vector[dim]:.2f} | '
+                    f'{clusters_info[dim][0]:{max_len}s} | '
+                    f'{", ".join([f"{token} ({count})" for token, count in stats["top_by_cluster"][dim]])}'
                 )
             print()
 
@@ -137,11 +140,18 @@ def analyze(
                 top_supertokens = get_top_supertokens(repo_vector, index, int(ind), metric)
                 print()
                 print('Intersecting topics:')
-                print('\n'.join([
-                    # f'{dim:3d} | intersection = {product / dist:.2f} | {", ".join([f"{token}" for token, count in stats["top_by_cluster"][dim]])}'
-                    f'intersection = {product / dist:.2f} | {clusters_info[dim][0]:50s} | {", ".join([f"{token}" for token in clusters_info[dim][1]])}'
+                cluster_strings = [
+                    f'{clusters_info[dim][0]} ({", ".join([f"{token}" for token in clusters_info[dim][1]])})'
                     for dim, product in top_supertokens
-                ]))
+                ]
+                max_len = max(len(string) for string in cluster_strings)
+                for (dim, product), cluster_string in zip(top_supertokens, cluster_strings):
+                    # f'{dim:3d} | intersection = {product / dist:.2f} | '
+                    print(
+                        f'intersection = {product / dist:.2f} | '
+                        f'{cluster_string:{max_len}s} | '
+                        f'{", ".join([f"{token} ({count})" for token, count in stats["top_by_cluster"][dim]])}'
+                    )
                 print()
 
         print('-----------------------')

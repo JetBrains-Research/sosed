@@ -211,8 +211,9 @@ def build_similarity_index(embedding: np.ndarray) -> faiss.IndexFlatIP:
 
 
 def get_top_supertokens(
-        repo_vector: np.ndarray, index: faiss.IndexFlatIP, ind: int, metric: str, k=10
+        repo_vector: np.ndarray, index: faiss.IndexFlatIP, ind: int, metric: str
 ) -> List[Tuple[int, np.float]]:
+    k = stats_top_tokens()
     dot_product = index.reconstruct(ind) * repo_vector
     if metric == 'cosine':
         idx = reversed(np.argsort(dot_product)[-k:])
