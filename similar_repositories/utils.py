@@ -13,9 +13,11 @@ TOKENIZER_DIR = Path('tokenizer')
 TOKENIZER_URL = 'https://github.com/JetBrains-Research/identifiers-extractor.git'
 TOKENIZER_VERSION = 'v1.1.1'
 
-DATA_LINK = 'https://drive.google.com/uc?id=1CTO24nZtMyHVQ43mhljfH2qN_QWNIZGo'
-DATA_ARCHIVE = 'data.tar.gz'
+DATA_LINK = 'https://s3-eu-west-1.amazonaws.com/resources.ml.labs.aws.intellij.net/sosed/{}'
+DATA_TC_ARCHIVE = 'data_tc.tar.xz'
+DATA_STARS_ARCHIVE = 'data_stars_{}.tar.xz'
 DATA_DIR = Path('data')
+DATA_TC_PATH = DATA_DIR / DATA_TC_ARCHIVE
 CLUSTERS_FILE = 'clusters.npy'
 CLUSTERS_INFO_FILE = 'clusters_info.pkl'
 TOKENS_FILE = 'tokens.txt'
@@ -42,11 +44,21 @@ def mkdir(path: str) -> None:
         raise ValueError(f'{path} is not a directory!')
 
 
-def download_data() -> None:
-    os.system(f'gdown {DATA_LINK}')
+def download_data(min_stars: int = None) -> None:
     mkdir(DATA_DIR)
-    os.system(f'tar -xzvf {DATA_ARCHIVE} -C {DATA_DIR} --strip-components 1')
-    os.remove(DATA_ARCHIVE)
+
+    if not DATA_TC_PATH.exists():
+        os.system(f'wget {DATA_LINK.format(DATA_TC_ARCHIVE)}')
+        os.system(f'tar -xvf {DATA_TC_ARCHIVE} -C {DATA_DIR}')
+        os.remove(DATA_TC_ARCHIVE)
+
+    if min_stars is not None:
+        data_stars = DATA_STARS_ARCHIVE.format(min_stars)
+        data_stars_path = DATA_DIR / data_stars
+        if not data_stars_path.exists():
+            os.system(f'wget {DATA_LINK.format(data_stars)}')
+            os.system(f'tar -xvf {data_stars} -C {DATA_DIR}')
+            os.remove(data_stars)
 
 
 def get_data_dir() -> Path:
@@ -83,7 +95,7 @@ def get_project_names(min_stars: int) -> List[str]:
     filepath = DATA_DIR / REPO_NAMES_FILES[min_stars]
 
     if not filepath.exists():
-        download_data()
+        download_data(min_stars)
 
     return [line.strip() for line in filepath.open('r')]
 
@@ -95,7 +107,7 @@ def get_project_vectors(min_stars: int) -> np.ndarray:
     filepath = DATA_DIR / REPO_EMBED_FILES[min_stars]
 
     if not filepath.exists():
-        download_data()
+        download_data(min_stars)
 
     return np.load(filepath, allow_pickle=True)
 
@@ -107,7 +119,7 @@ def get_project_languages(min_stars: int) -> List[str]:
     filepath = DATA_DIR / REPO_LANGUAGES_FILES[min_stars]
 
     if not filepath.exists():
-        download_data()
+        download_data(min_stars)
 
     return pickle.load(open(filepath, 'rb'))
 
