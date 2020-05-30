@@ -7,7 +7,6 @@ https://github.com/firehol/blocklist-ipsets.git
 https://github.com/openshift/origin.git
 https://github.com/ansible/ansible.git
 https://github.com/Automattic/wp-calypso.git
-https://github.com/dotnet/corefx.git
 https://github.com/dotnet/roslyn.git
 https://github.com/nodejs/node.git
 https://github.com/tensorflow/tensorflow.git
@@ -22,7 +21,6 @@ https://github.com/servo/servo.git
 https://github.com/flutter/flutter.git
 https://github.com/homebrew/homebrew-core.git
 https://github.com/home-assistant/home-assistant.git
-https://github.com/dotnet/coreclr.git
 https://github.com/CocoaPods/Specs.git
 https://github.com/elastic/kibana.git
 https://github.com/JuliaLang/julia.git
@@ -40,7 +38,6 @@ https://github.com/ManageIQ/manageiq.git
 https://github.com/godotengine/godot.git
 https://github.com/gentoo/gentoo.git
 https://github.com/odoo/odoo.git
-https://github.com/MicrosoftDocs/azure-docs.git
 https://github.com/magento/magento2.git
 https://github.com/saltstack/salt.git
 https://github.com/AdguardTeam/AdguardFilters.git
@@ -64,7 +61,6 @@ https://github.com/nextcloud/server.git
 https://github.com/helm/charts.git
 https://github.com/hashicorp/terraform.git
 https://github.com/ant-design/ant-design.git
-https://github.com/phalcon/docs.git
 https://github.com/cms-sw/cms-sw.github.io.git
 https://github.com/apache/kafka.git
 https://github.com/electron/electron.git
@@ -87,7 +83,6 @@ https://github.com/angular/angular-cli.git
 https://github.com/mapsme/omim.git
 https://github.com/eclipse/che.git
 https://github.com/brave/browser-laptop.git
-https://github.com/jlord/patchwork.git
 https://github.com/angular/components.git
 https://github.com/python/cpython.git
 https://github.com/vgstation-coders/vgstation13.git
@@ -97,4 +92,3 @@ https://github.com/ionic-team/ionic.git
 https://github.com/oppia/oppia.git
 https://github.com/Alluxio/alluxio.git
 https://github.com/XX-net/XX-Net.git
-https://github.com/dotnet/cli.git

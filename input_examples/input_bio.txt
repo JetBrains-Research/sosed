@@ -1,5 +1,0 @@
-https://github.com/yana-safonova/ig_repertoire_constructor.git
-https://github.com/bioinform/neusomatic.git
-https://github.com/bioinform/somaticseq.git
-https://github.com/google/deepvariant.git
-https://github.com/nextflow-io/nextflow.git
