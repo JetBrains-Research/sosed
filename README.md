@@ -39,16 +39,16 @@ with the tool shows that both options produce similar results. It is worth notin
 
 In the end, for a given project, the tool will output its nearest neigbors among these 9 million projects, sorted by their similarity.
 
-### Video demonstration
-
-We recorded a short video demonstrating the features of _Sosed_: finding similar projects, filtering them by 
-language and GitHub stars, producing explainable output. The video is [available on Youtube](https://www.youtube.com/watch?v=LYLkztCGRt8).
-
 ### Explaining the output
 
 In order for *Sosed* not to act as a black-box, we manually labeled all 256 clusters with short descriptions of their topics.
 If you pass `--explain` flag to *Sosed*, it will identify clusters that contributed the most to the similarity and 
 print their descriptions.
+
+### Video demonstration
+
+We recorded a short video demonstrating the features of _Sosed_: finding similar projects, filtering them by 
+language and GitHub stars, producing explainable output. The video is [available on Youtube](https://www.youtube.com/watch?v=LYLkztCGRt8).
 
 ## Getting started
 
