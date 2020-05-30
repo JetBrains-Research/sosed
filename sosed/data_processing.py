@@ -43,7 +43,7 @@ class ProcessedData:
 
         self._repo_names_file = folder / 'repo_names.txt'
         self._repo_vectors_file = folder / 'repo_vectors.npy'
-        self._repo_stats_file = folder / 'repo_stats.json'
+        self._repo_stats_file = folder / 'repo_stats.pkl'
         self._repo_names = None
         self._repo_vectors = None
         self._repo_stats = None
