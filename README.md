@@ -132,3 +132,11 @@ python3 -m sosed.run \
   -i input_examples/input.txt -o output_example \
   --local --force --min_stars 10 --closest 20 --batches 1000 --metric cosine --explain --lang Go
 ```
+
+## Evaluation
+
+To verify the tool, we identified the most similar projects to a set of 94 popular GitHub repositories (the list is
+available [here](input_examples/input_evaluation.txt)). We applied filtering to output only the projects with 100+ stars.
+
+From our point of view, the results seem promising, but we still should conduct a thorough evaluation.
+We made the full output available for both [KL-divergence](output/output_evaluation_kl.log) and [cosine similarity](output/output_evaluation_cosine.log).
