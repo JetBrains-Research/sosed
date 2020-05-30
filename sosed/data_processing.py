@@ -190,7 +190,7 @@ def normalize_vectors(vectors: np.ndarray) -> np.ndarray:
     return vectors / np.linalg.norm(vectors, axis=1, keepdims=True)
 
 
-def smooth_vectors(vectors: np.ndarray, smoothing_addition=1.) -> np.ndarray:
+def smooth_vectors(vectors: np.ndarray, smoothing_addition=.01) -> np.ndarray:
     return vectors + smoothing_addition
 
 

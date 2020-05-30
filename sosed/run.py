@@ -133,8 +133,15 @@ def analyze(
                 )
             print()
 
+        if metric == 'kl':
+            baseline = (repo_vector * np.log(repo_vector)).sum()
+
         for ind, dist in zip(idx, dist_vector):
-            print(f'https://github.com/{project_names[ind]} | similarity = {dist:.4f}')
+            similarity = dist
+            if metric == 'kl':
+                similarity = baseline - similarity
+
+            print(f'https://github.com/{project_names[ind]} | similarity = {similarity:.4f}')
 
             if explain:
                 top_supertokens = get_top_supertokens(repo_vector, index, int(ind), metric)
@@ -147,8 +154,11 @@ def analyze(
                 max_len = max(len(string) for string in cluster_strings)
                 for (dim, product), cluster_string in zip(top_supertokens, cluster_strings):
                     # f'{dim:3d} | intersection = {product / dist:.2f} | '
+                    if metric == 'kl':
+                        product *= -1
+
                     print(
-                        f'intersection = {product / dist:.2f} | '
+                        f'intersection = {product / similarity:.2f} | '
                         f'{cluster_string:{max_len}s} | '
                         f'{", ".join([f"{token} ({count})" for token, count in stats["top_by_cluster"][dim]])}'
                     )
