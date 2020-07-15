@@ -5,6 +5,8 @@
 
 An embedding-based approach to detect similar software projects.
 
+[Preprint on arXiv](https://arxiv.org/abs/2007.02599)
+
 ## *Sosed*'s history
 
 Initially, we created a novel approach to represent code as a part of a source code topic modeling project (not finished yet).
