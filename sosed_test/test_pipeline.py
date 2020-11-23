@@ -30,6 +30,7 @@ class PipelineTest(unittest.TestCase):
         block_header = 'Query project: '
 
         output = [line.strip() for line in self.output_file.open('r').readlines()]
+        print(output)
         for line in output:
             if line.startswith(block_header):
                 encountered_repos.append(line[len(block_header):])
