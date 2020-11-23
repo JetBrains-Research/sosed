@@ -19,11 +19,12 @@ class PipelineTest(unittest.TestCase):
         k = 9
         metric = 'cosine'
 
-        os.system(
+        return_value = os.system(
             f'python3 -m sosed.run '
             f'-i {self.input_file} -o {self.output_dir} -k {k} -s {min_stars} -m {metric}'
             f'> {self.output_file}'
         )
+        print(return_value)
 
         encountered_repos = []
         similarities = []
