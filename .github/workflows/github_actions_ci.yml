@@ -46,14 +46,14 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest sosed_test/test_data_processing.py
+        pytest sosed_test/test_data_processing.py -s
     - name: Setup tokenizer
       run: |
         # Download tokenizer and its dependencies
         python -m sosed.setup_tokenizer
     - name: Run integration test
       run: |
-        pytest sosed_test/test_pipeline.py
+        pytest sosed_test/test_pipeline.py -s
 
   push:
 

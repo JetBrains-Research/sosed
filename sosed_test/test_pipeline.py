@@ -39,6 +39,8 @@ class PipelineTest(unittest.TestCase):
             elif line.startswith('https'):
                 similarities[-1].append(float(line.split(' | ')[1].split(' = ')[1]))
 
+        print(self.repo_names)
+        print(encountered_repos)
         self.assertEqual(self.repo_names, encountered_repos)
 
         for sims in similarities:
