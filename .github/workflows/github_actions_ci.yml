@@ -54,6 +54,9 @@ jobs:
       run: |
         # Download tokenizer and its dependencies
         python -m sosed.setup_tokenizer
+    - name: Verify langs.so
+      run: |
+        ldd tokenizer/identifiers_extractor/parsers/build/langs.so
     - name: Run integration test
       run: |
         pytest sosed_test/test_pipeline.py -s
