@@ -35,9 +35,10 @@ jobs:
         pip install flake8 pytest
         pip install cython
         pip install -r requirements.txt
-    - name: Check g++ version
+    - name: Check g++ and gcc version
       run: |
         g++ --version
+        gcc --version
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
