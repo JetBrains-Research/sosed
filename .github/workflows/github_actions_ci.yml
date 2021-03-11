@@ -19,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        platform: [ubuntu-latest, macos-latest]
+        platform: [macos-latest]
 
     runs-on: ${{ matrix.platform }}
 
