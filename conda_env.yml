@@ -15,4 +15,4 @@ dependencies:
   - pip
   - pip:
     - PyStemmer
-    - tree_sitter
+    - tree_sitter==0.1.1
