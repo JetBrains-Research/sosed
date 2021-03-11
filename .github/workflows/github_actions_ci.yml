@@ -40,6 +40,7 @@ jobs:
         g++ --version
         gcc --version
         /sbin/ldconfig -p | grep stdc++
+        ls -l  /usr/lib/x86_64-linux-gnu/libstdc++.so.6
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
