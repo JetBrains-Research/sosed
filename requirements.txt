@@ -6,4 +6,4 @@ Pygments>=2.6.1
 PyStemmer>=2.0.0.1
 pytest>=5.4.1
 tqdm>=4.46.0
-tree-sitter>=0.1.1
+tree-sitter==0.1.1
