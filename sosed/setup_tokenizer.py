@@ -1,7 +1,6 @@
 import os
 
 from .utils import *
-from tokenizer.identifiers_extractor.parsers.utils import main as init_libraries
 
 
 def setup_tokenizer() -> None:
@@ -13,6 +12,7 @@ def setup_tokenizer() -> None:
     os.chdir(TOKENIZER_DIR)
     os.system('git submodule update --init --recursive --depth 1')
     os.chdir('..')
+    from tokenizer.identifiers_extractor.parsers.utils import main as init_libraries
     init_libraries()
 
 
