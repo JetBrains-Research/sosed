@@ -19,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        platform: [macos-latest]
+        platform: [ubuntu-latest]
 
     runs-on: ${{ matrix.platform }}
 
@@ -35,10 +35,11 @@ jobs:
         pip install flake8 pytest
         pip install cython
         pip install -r requirements.txt
-    - name: Check g++ and gcc version
+    - name: Check g++, gcc, and libstdc++ version
       run: |
         g++ --version
         gcc --version
+        /sbin/ldconfig -p | grep stdc++
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
