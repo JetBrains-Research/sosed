@@ -9,13 +9,14 @@ from .data_processing import *
 from tokenizer.identifiers_extractor.run import main as run_tokenizer
 
 
-def tokenize(input_file: str, output_dir: str, batches: int, local: str, force: bool) -> None:
+def tokenize(input_file: str, output_dir: str, batches: int, local: str, force: bool, topics: bool) -> None:
     """
     :param input_file: input file with a list of links to projects for analysis.
     :param output_dir: directory to store data during tokenizing.
     :param batches: size of project batches that are saved to one file.
     :param local: if True, input file should contain paths to local projects.
     :param force: if True, tokenizer will re-run (even if results have been stored previously).
+    :param topics: if True, tokenized will run in file mode for further topics JSON building.
     :return: None.
     """
 
@@ -31,12 +32,16 @@ def tokenize(input_file: str, output_dir: str, batches: int, local: str, force: 
     if not os.path.exists(input_file):
         raise ValueError(f'Input file {input_file} does not exist!')
 
-    tokenizer_args = Namespace(input=input_file, output=output_dir, batches=batches, local=local)
+    if topics and sum(1 for _ in open(input_file)) != 1:
+        raise ValueError(f'In topics mode input file must contain exactly one repo!')
+
+    tokenizer_args = Namespace(input=input_file, output=output_dir, batches=batches, local=local,
+                               files=topics)
     print(f'Running tokenizer on repos listed in {input_file}')
     run_tokenizer(tokenizer_args)
 
 
-def vectorize(processed_data: ProcessedData, force: bool) -> None:
+def vectorize(processed_data: ProcessedData, force: bool, all_files_mode: bool) -> None:
     """
     Compute numerical representations for repositories processed by tokenizer.
     :param processed_data: wrapper for directory where tokenizer stored extracted data about tokens in repositories.
@@ -58,7 +63,7 @@ def vectorize(processed_data: ProcessedData, force: bool) -> None:
     for ind in processed_data.indices():
         vocab = processed_data.load_tokens_vocab(ind)
         tokens_to_clusters = assign_clusters(vocab)
-        docword = processed_data.load_docword(ind)
+        docword = processed_data.load_docword(ind, all_files_mode)
         repo_names, vectors = compute_vectors(docword, tokens_to_clusters)
         repo_stats = compute_repo_stats(docword, tokens_to_clusters, vocab)
         all_repo_names += repo_names
@@ -71,8 +76,58 @@ def vectorize(processed_data: ProcessedData, force: bool) -> None:
     processed_data.store_repo_stats(all_repo_stats)
 
 
+def analyze_topics(
+        processed_data: ProcessedData, output_dir: str
+) -> None:
+    repo_vectors = probability_vectors(smooth_vectors(processed_data.load_repo_vectors()))
+    cnts = processed_data.load_repo_vectors().sum(axis=1, keepdims=True)
+    repo_names = processed_data.load_repo_names()
+    clusters_info = get_clusters_info()
+    out_file_path = os.path.join(output_dir, f"topics.txt")
+    with open(os.path.abspath(out_file_path), "w+") as fout:
+        fout.write('{\n')
+        fout.write('\t\"data\" : [')
+        is_first_repo = True
+        for repo_name, repo_vector, cnt in zip(repo_names, repo_vectors, cnts):
+            if is_first_repo:
+                fout.write("\n")
+                is_first_repo = False
+            else:
+                fout.write(",\n")
+            fout.write(f'\t\t{{\n')
+            fout.write(f'\t\t\t\"path\" : "{repo_name}\",\n')
+            fout.write(f'\t\t\t\"topics\" : [')
+            topics = np.argsort(repo_vector)[-5:][::-1]
+            is_first = True
+            if cnt != 0:
+                for dim in topics:
+                    if is_first:
+                        is_first = False
+                        fout.write(f'\n')
+                    else:
+                        fout.write(f',\n')
+                    topic_name = clusters_info[dim][0].replace('"', "'")
+                    fout.write(f'\t\t\t\t\"{topic_name}\"')
+            fout.write(f'\n\t\t\t],\n')
+            fout.write(f'\t\t\t\"probs\" : [')
+            is_first = True
+            if cnt != 0:
+                for dim in topics:
+                    if is_first:
+                        is_first = False
+                        fout.write(f'\n')
+                    else:
+                        fout.write(f',\n')
+                    fout.write(f'\t\t\t\t\"{repo_vector[dim]:.3f}\"')
+            fout.write(f'\n\t\t\t]\n')
+            fout.write('\t\t}')
+        fout.write('\n\t]\n')
+        fout.write('}\n')
+    print(f'JSON with tokens was written in {out_file_path}.')
+
+
 def analyze(
-        processed_data: ProcessedData, min_stars: int, closest: int, explain: bool, metric: str, language: str
+        processed_data: ProcessedData, min_stars: int, closest: int, explain: bool, metric: str, language: str,
 ) -> None:
     """
     Find similar projects for repositories based on their numerical representations.
@@ -132,7 +187,6 @@ def analyze(
                     f'{", ".join([f"{token} ({count})" for token, count in stats["top_by_cluster"][dim]])}'
                 )
             print()
-
         if metric == 'kl':
             baseline = (repo_vector * np.log(repo_vector)).sum()
 
@@ -194,8 +248,7 @@ if __name__ == "__main__":
                              "Notice, that language data was extracted with GHTorrent and for some projects language "
                              "information is missing.")
     args = parser.parse_args()
-
-    tokenize(args.input, args.output, args.batches, args.local, args.force)
+    tokenize(args.input, args.output, args.batches, args.local, args.force, False)
     processed_data = ProcessedData(Path(args.output))
-    vectorize(processed_data, args.force)
+    vectorize(processed_data, args.force, False)
     analyze(processed_data, args.min_stars, args.closest, args.explain, args.metric, args.lang)
