@@ -83,7 +83,7 @@ def analyze_topics(
     cnts = processed_data.load_repo_vectors().sum(axis=1, keepdims=True)
     repo_names = processed_data.load_repo_names()
     clusters_info = get_clusters_info()
-    out_file_path = os.path.join(output_dir, f"topics.txt")
+    out_file_path = os.path.join(output_dir, f"topics.txt")  # TODO to json
     with open(os.path.abspath(out_file_path), "w+") as fout:
         fout.write('{\n')
         fout.write('\t\"data\" : [')
