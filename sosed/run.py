@@ -32,9 +32,6 @@ def tokenize(input_file: str, output_dir: str, batches: int, local: str, force: 
     if not os.path.exists(input_file):
         raise ValueError(f'Input file {input_file} does not exist!')
 
-    if topics and sum(1 for _ in open(input_file)) != 1:
-        raise ValueError(f'In topics mode input file must contain exactly one repo!')
-
     tokenizer_args = Namespace(input=input_file, output=output_dir, batches=batches, local=local,
                                files=topics)
     print(f'Running tokenizer on repos listed in {input_file}')
@@ -63,8 +60,10 @@ def vectorize(processed_data: ProcessedData, force: bool, all_files_mode: bool) 
     for ind in processed_data.indices():
         vocab = processed_data.load_tokens_vocab(ind)
         tokens_to_clusters = assign_clusters(vocab)
-        docword = processed_data.load_docword(ind, all_files_mode)
+        docword, doc_name = processed_data.load_docword(ind, all_files_mode)
         repo_names, vectors = compute_vectors(docword, tokens_to_clusters)
+        for idx in range(len(repo_names)):
+            repo_names[idx] = doc_name + repo_names[idx]
         repo_stats = compute_repo_stats(docword, tokens_to_clusters, vocab)
         all_repo_names += repo_names
         all_vectors_list.append(vectors)
@@ -83,20 +82,32 @@ def analyze_topics(
     cnts = processed_data.load_repo_vectors().sum(axis=1, keepdims=True)
     repo_names = processed_data.load_repo_names()
     clusters_info = get_clusters_info()
-    out_file_path = os.path.join(output_dir, f"topics.txt")  # TODO to json
+    out_file_path = os.path.join(output_dir, f"topics.json")
     with open(os.path.abspath(out_file_path), "w+") as fout:
-        fout.write('{\n')
-        fout.write('\t\"data\" : [')
         is_first_repo = True
-        for repo_name, repo_vector, cnt in zip(repo_names, repo_vectors, cnts):
+        repo_name = ""
+        for file_name, repo_vector, cnt in zip(repo_names, repo_vectors, cnts):
             if is_first_repo:
-                fout.write("\n")
+                repo_name = file_name[:-1]
+                fout.write('{\n')
+                fout.write('\t\"data\" : [\n')
+                fout.write(f'\t\t{{\n')
+                fout.write(f'\t\t\t\"path\" : "{repo_name}\",\n')
+                fout.write(f'\t\t\t\"files\" : [\n')
                 is_first_repo = False
             else:
-                fout.write(",\n")
-            fout.write(f'\t\t{{\n')
-            fout.write(f'\t\t\t\"path\" : "{repo_name}\",\n')
-            fout.write(f'\t\t\t\"topics\" : [')
+                if not file_name.startswith(repo_name):
+                    repo_name = file_name[:-1]
+                    fout.write('\n\t\t\t]\n')
+                    fout.write('\t\t},\n')
+                    fout.write('\t\t{\n')
+                    fout.write(f'\t\t\t\"path\" : "{repo_name}\",\n')
+                    fout.write(f'\t\t\t\"files\" : [\n')
+                else:
+                    fout.write(",\n")
+            fout.write(f'\t\t\t\t{{\n')
+            fout.write(f'\t\t\t\t\t\"path\" : "{file_name[len(repo_name):]}\",\n')
+            fout.write(f'\t\t\t\t\t\"topics\" : [')
             topics = np.argsort(repo_vector)[-5:][::-1]
             is_first = True
             if cnt != 0:
@@ -107,9 +118,9 @@ def analyze_topics(
                     else:
                         fout.write(f',\n')
                     topic_name = clusters_info[dim][0].replace('"', "'")
-                    fout.write(f'\t\t\t\t\"{topic_name}\"')
-            fout.write(f'\n\t\t\t],\n')
-            fout.write(f'\t\t\t\"probs\" : [')
+                    fout.write(f'\t\t\t\t\t\t\"{topic_name}\"')
+            fout.write(f'\n\t\t\t\t\t],\n')
+            fout.write(f'\t\t\t\t\t\"probs\" : [')
             is_first = True
             if cnt != 0:
                 for dim in topics:
@@ -118,10 +129,12 @@ def analyze_topics(
                         fout.write(f'\n')
                     else:
                         fout.write(f',\n')
-                    fout.write(f'\t\t\t\t\"{repo_vector[dim]:.3f}\"')
-            fout.write(f'\n\t\t\t]\n')
-            fout.write('\t\t}')
-        fout.write('\n\t]\n')
+                    fout.write(f'\t\t\t\t\t\t\"{repo_vector[dim]:.3f}\"')
+            fout.write(f'\n\t\t\t\t\t]\n')
+            fout.write('\t\t\t\t}')
+        fout.write('\n\t\t\t]\n')
+        fout.write('\t\t}\n')
+        fout.write('\t]\n')
         fout.write('}\n')
     print(f'JSON with tokens was written in {out_file_path}.')
 

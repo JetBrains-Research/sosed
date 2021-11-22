@@ -86,19 +86,25 @@ class ProcessedData:
 
         return self._tokens_vocab[ind]
 
-    def load_docword(self, ind: int, files_mode: bool) -> Dict[str, Counter]:
+    def load_docword(self, ind: int, files_mode: bool) -> (Dict[str, Counter], str):
         """
         :param ind: index of docword file.
         :param files_mode: true if docword contains files, not repos.
         :return: mapping from repository names to counts of tokens in them.
         """
+        doc_name = ""
         if self._docword[ind] is None:
             docword = {}
 
             with self._docword_files[ind].open('r') as fin:
+                is_first = True
                 for line in fin:
                     line = line.strip()
                     if line:
+                        if is_first and files_mode:
+                            doc_name = line
+                            is_first = False
+                            continue
                         repo_name, rest = line.split(';')
                         token_counter = Counter()
                         if rest != "":
@@ -127,7 +133,7 @@ class ProcessedData:
                                 curr_name = curr_name[:curr_name.rfind('/')]
                         docword['/'] = counter
             self._docword[ind] = collections.OrderedDict(sorted(docword.items()))
-        return self._docword[ind]
+        return self._docword[ind], doc_name
 
     def store_repo_names(self, repo_names: List[str]) -> None:
         self._repo_names = repo_names
