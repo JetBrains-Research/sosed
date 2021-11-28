@@ -86,10 +86,32 @@ class ProcessedData:
 
         return self._tokens_vocab[ind]
 
-    def load_docword(self, ind: int, files_mode: bool) -> (Dict[str, Counter], str):
+    def load_docword(self, ind: int) -> Dict[str, Counter]:
         """
         :param ind: index of docword file.
-        :param files_mode: true if docword contains files, not repos.
+        :return: mapping from repository names to counts of tokens in them.
+        """
+        if self._docword[ind] is None:
+            docword = {}
+
+            with self._docword_files[ind].open('r') as fin:
+                for line in fin:
+                    line = line.strip()
+                    if line:
+                        repo_name, rest = line.split(';')
+                        token_counter = Counter()
+                        for token_count in rest.split(','):
+                            token_ind, count = token_count.split(':')
+                            token_counter[int(token_ind)] = int(count)
+                        docword[repo_name] = token_counter
+
+            self._docword[ind] = docword
+
+        return self._docword[ind]
+
+    def load_all_files_docword(self, ind: int) -> (Dict[str, Counter], str):
+        """
+        :param ind: index of docword file.
         :return: mapping from repository names to counts of tokens in them.
         """
         doc_name = ""
@@ -101,7 +123,7 @@ class ProcessedData:
                 for line in fin:
                     line = line.strip()
                     if line:
-                        if is_first and files_mode:
+                        if is_first:
                             doc_name = line
                             is_first = False
                             continue
@@ -112,26 +134,22 @@ class ProcessedData:
                                 token_ind, count = token_count.split(':')
                                 token_counter[int(token_ind)] = int(count)
                         docword[repo_name] = token_counter
-                if files_mode:
-                    files_names = list(docword.keys())
-                    idx = 0
-                    stack = []
-                    while idx < len(files_names):
-                        curr_name = files_names[idx]
-                        counter = docword[curr_name]
-                        curr_name = curr_name[:curr_name.rfind('/')]
-                        idx += 1
-                        while curr_name != '':
-                            if len(stack) > 0 and curr_name == stack[-1][0]:
-                                counter += stack[-1][1]
-                                stack.pop()
-                            if idx < len(files_names) and files_names[idx].startswith(curr_name):
-                                stack.append((curr_name, counter))
-                                break
-                            else:
-                                docword[curr_name] = counter
-                                curr_name = curr_name[:curr_name.rfind('/')]
-                        docword['/'] = counter
+                files_names = list(docword.keys())
+                stack = []
+                for idx, curr_name in enumerate(files_names):
+                    counter = docword[curr_name]
+                    curr_name = curr_name[:curr_name.rfind('/')]
+                    while curr_name != '':
+                        if len(stack) > 0 and curr_name == stack[-1][0]:
+                            counter += stack[-1][1]
+                            stack.pop()
+                        if idx + 1 < len(files_names) and files_names[idx + 1].startswith(curr_name):
+                            stack.append((curr_name, counter))
+                            break
+                        else:
+                            docword[curr_name] = counter
+                            curr_name = curr_name[:curr_name.rfind('/')]
+                    docword['/'] = counter
             self._docword[ind] = collections.OrderedDict(sorted(docword.items()))
         return self._docword[ind], doc_name
 

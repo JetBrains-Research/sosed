@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 import numpy as np
 
@@ -61,7 +62,10 @@ def vectorize(processed_data: ProcessedData, force: bool, all_files_mode: bool) 
     for ind in processed_data.indices():
         vocab = processed_data.load_tokens_vocab(ind)
         tokens_to_clusters = assign_clusters(vocab)
-        docword, doc_name = processed_data.load_docword(ind, all_files_mode)
+        if all_files_mode:
+            docword, doc_name = processed_data.load_all_files_docword(ind)
+        else:
+            docword, doc_name = processed_data.load_docword(ind)
         repo_names, vectors = compute_vectors(docword, tokens_to_clusters)
         for idx in range(len(repo_names)):
             repo_names[idx] = doc_name + repo_names[idx]
@@ -84,60 +88,26 @@ def analyze_topics(
     repo_names = processed_data.load_repo_names()
     clusters_info = get_clusters_info()
     out_file_path = os.path.join(output_dir, f"topics.json")
+    repo_name = ""
+    json_data = {"timestamp": str(datetime.datetime.utcnow()), "data": []}
+    repo_data = {}
+    for file_name, repo_vector, cnt in zip(repo_names, repo_vectors, cnts):
+        if repo_name == "" or not file_name.startswith(repo_name):
+            if repo_name != "":
+                json_data['data'].append(repo_data)
+            repo_name = file_name[:-1]
+            repo_data = {'path': repo_name, 'files': []}
+        file_data = {'path': file_name[len(repo_name):], 'topics': [], 'probs': []}
+        topics = np.argsort(repo_vector)[-5:][::-1]
+        if cnt != 0:
+            for dim in topics:
+                topic_name = clusters_info[dim][0].replace('"', "'")
+                file_data['topics'].append(topic_name)
+                file_data['probs'].append("{:.3f}".format(repo_vector[dim]))
+        repo_data['files'].append(file_data)
+    json_dump = json.dumps(json_data, indent=4)
     with open(os.path.abspath(out_file_path), "w+") as fout:
-        is_first_repo = True
-        repo_name = ""
-        for file_name, repo_vector, cnt in zip(repo_names, repo_vectors, cnts):
-            if is_first_repo:
-                repo_name = file_name[:-1]
-                fout.write('{\n')
-                fout.write(f'\t\"timestamp\" : \"{datetime.datetime.utcnow()}\",\n')
-                fout.write('\t\"data\" : [\n')
-                fout.write(f'\t\t{{\n')
-                fout.write(f'\t\t\t\"path\" : "{repo_name}\",\n')
-                fout.write(f'\t\t\t\"files\" : [\n')
-                is_first_repo = False
-            else:
-                if not file_name.startswith(repo_name):
-                    repo_name = file_name[:-1]
-                    fout.write('\n\t\t\t]\n')
-                    fout.write('\t\t},\n')
-                    fout.write('\t\t{\n')
-                    fout.write(f'\t\t\t\"path\" : "{repo_name}\",\n')
-                    fout.write(f'\t\t\t\"files\" : [\n')
-                else:
-                    fout.write(",\n")
-            fout.write(f'\t\t\t\t{{\n')
-            fout.write(f'\t\t\t\t\t\"path\" : "{file_name[len(repo_name):]}\",\n')
-            fout.write(f'\t\t\t\t\t\"topics\" : [')
-            topics = np.argsort(repo_vector)[-5:][::-1]
-            is_first = True
-            if cnt != 0:
-                for dim in topics:
-                    if is_first:
-                        is_first = False
-                        fout.write(f'\n')
-                    else:
-                        fout.write(f',\n')
-                    topic_name = clusters_info[dim][0].replace('"', "'")
-                    fout.write(f'\t\t\t\t\t\t\"{topic_name}\"')
-            fout.write(f'\n\t\t\t\t\t],\n')
-            fout.write(f'\t\t\t\t\t\"probs\" : [')
-            is_first = True
-            if cnt != 0:
-                for dim in topics:
-                    if is_first:
-                        is_first = False
-                        fout.write(f'\n')
-                    else:
-                        fout.write(f',\n')
-                    fout.write(f'\t\t\t\t\t\t\"{repo_vector[dim]:.3f}\"')
-            fout.write(f'\n\t\t\t\t\t]\n')
-            fout.write('\t\t\t\t}')
-        fout.write('\n\t\t\t]\n')
-        fout.write('\t\t}\n')
-        fout.write('\t]\n')
-        fout.write('}\n')
+        fout.write(json_dump)
     print(f'JSON with tokens was written in {out_file_path}.')
 
 
