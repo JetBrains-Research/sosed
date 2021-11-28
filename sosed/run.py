@@ -1,3 +1,4 @@
+import datetime
 import os
 import numpy as np
 
@@ -90,6 +91,7 @@ def analyze_topics(
             if is_first_repo:
                 repo_name = file_name[:-1]
                 fout.write('{\n')
+                fout.write(f'\t\"timestamp\" : \"{datetime.datetime.utcnow()}\",\n')
                 fout.write('\t\"data\" : [\n')
                 fout.write(f'\t\t{{\n')
                 fout.write(f'\t\t\t\"path\" : "{repo_name}\",\n')
