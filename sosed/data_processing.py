@@ -135,21 +135,17 @@ class ProcessedData:
                                 token_counter[int(token_ind)] = int(count)
                         docword[repo_name] = token_counter
                 files_names = list(docword.keys())
-                stack = []
+                docword['/'] = Counter()
                 for idx, curr_name in enumerate(files_names):
                     counter = docword[curr_name]
-                    curr_name = curr_name[:curr_name.rfind('/')]
-                    while curr_name != '':
-                        if len(stack) > 0 and curr_name == stack[-1][0]:
-                            counter += stack[-1][1]
-                            stack.pop()
-                        if idx + 1 < len(files_names) and files_names[idx + 1].startswith(curr_name):
-                            stack.append((curr_name, counter))
-                            break
+                    name = curr_name[:curr_name.rfind('/')]
+                    while name != '':
+                        if name in docword:
+                            docword[name] += counter
                         else:
-                            docword[curr_name] = counter
-                            curr_name = curr_name[:curr_name.rfind('/')]
-                    docword['/'] = counter
+                            docword[name] = counter
+                        name = name[:name.rfind('/')]
+                    docword['/'] += counter
             self._docword[ind] = collections.OrderedDict(sorted(docword.items()))
         return self._docword[ind], doc_name
 

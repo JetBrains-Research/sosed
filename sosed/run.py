@@ -65,7 +65,8 @@ def vectorize(processed_data: ProcessedData, force: bool, all_files_mode: bool) 
         if all_files_mode:
             docword, doc_name = processed_data.load_all_files_docword(ind)
         else:
-            docword, doc_name = processed_data.load_docword(ind)
+            docword = processed_data.load_docword(ind)
+            doc_name = ""
         repo_names, vectors = compute_vectors(docword, tokens_to_clusters)
         for idx in range(len(repo_names)):
             repo_names[idx] = doc_name + repo_names[idx]
@@ -105,6 +106,7 @@ def analyze_topics(
                 file_data['topics'].append(topic_name)
                 file_data['probs'].append("{:.3f}".format(repo_vector[dim]))
         repo_data['files'].append(file_data)
+    json_data['data'].append(repo_data)
     json_dump = json.dumps(json_data, indent=4)
     with open(os.path.abspath(out_file_path), "w+") as fout:
         fout.write(json_dump)
