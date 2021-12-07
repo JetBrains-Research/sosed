@@ -119,14 +119,10 @@ class ProcessedData:
             docword = {}
 
             with self._docword_files[ind].open('r') as fin:
-                is_first = True
+                doc_name = fin.readline()
                 for line in fin:
                     line = line.strip()
                     if line:
-                        if is_first:
-                            doc_name = line
-                            is_first = False
-                            continue
                         repo_name, rest = line.split(';')
                         token_counter = Counter()
                         if rest != "":
@@ -135,17 +131,24 @@ class ProcessedData:
                                 token_counter[int(token_ind)] = int(count)
                         docword[repo_name] = token_counter
                 files_names = list(docword.keys())
-                docword['/'] = Counter()
-                for idx, curr_name in enumerate(files_names):
+                idx = 0
+                stack = []
+                while idx < len(files_names):
+                    curr_name = files_names[idx]
                     counter = docword[curr_name]
-                    name = curr_name[:curr_name.rfind('/')]
-                    while name != '':
-                        if name in docword:
-                            docword[name] += counter
+                    curr_name = curr_name[:curr_name.rfind('/')]
+                    idx += 1
+                    while curr_name != '':
+                        if len(stack) > 0 and curr_name == stack[-1][0]:
+                            counter += stack[-1][1]
+                            stack.pop()
+                        if idx < len(files_names) and files_names[idx].startswith(curr_name):
+                            stack.append((curr_name, counter))
+                            break
                         else:
-                            docword[name] = counter
-                        name = name[:name.rfind('/')]
-                    docword['/'] += counter
+                            docword[curr_name] = counter
+                            curr_name = curr_name[:curr_name.rfind('/')]
+                    docword['/'] = counter
             self._docword[ind] = collections.OrderedDict(sorted(docword.items()))
         return self._docword[ind], doc_name
 
