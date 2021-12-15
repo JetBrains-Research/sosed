@@ -137,18 +137,18 @@ class ProcessedData:
                     curr_name = files_names[idx]
                     counter = docword[curr_name]
                     curr_name = curr_name[:curr_name.rfind('/')]
+                    docword['/'] += counter
                     idx += 1
                     while curr_name != '':
                         if len(stack) > 0 and curr_name == stack[-1][0]:
                             counter += stack[-1][1]
                             stack.pop()
-                        if idx < len(files_names) and files_names[idx].startswith(curr_name):
+                        if idx < len(files_names) and files_names[idx].startswith(curr_name + '/'):
                             stack.append((curr_name, counter))
                             break
                         else:
                             docword[curr_name] = counter
                             curr_name = curr_name[:curr_name.rfind('/')]
-                    docword['/'] = counter
             self._docword[ind] = collections.OrderedDict(sorted(docword.items()))
         return self._docword[ind], doc_name
 
