@@ -133,6 +133,7 @@ class ProcessedData:
                 files_names = list(docword.keys())
                 idx = 0
                 stack = []
+                docword['/'] = Counter()
                 while idx < len(files_names):
                     curr_name = files_names[idx]
                     counter = docword[curr_name]
