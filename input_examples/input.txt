@@ -4,6 +4,5 @@ https://github.com/beefytech/Beef
 https://github.com/TheAlgorithms/Java
 https://github.com/xkcoding/spring-boot-demo
 https://github.com/Qv2ray/Qv2ray
-https://github.com/timgrossmann/InstaPy
 https://github.com/open-telemetry/opentelemetry-java
 https://github.com/tensorflow/tensorflow.git
