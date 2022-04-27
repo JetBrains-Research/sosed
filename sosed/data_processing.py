@@ -1,3 +1,4 @@
+import collections
 import os
 import numpy as np
 import faiss
@@ -16,10 +17,12 @@ __all__ = [
     'build_similarity_index', 'get_top_supertokens', 'filter_by_language', 'compute_repo_stats'
 ]
 
+
 class ProcessedData:
     """
     Wrapper to ease work with output of tokenizer and extracted vector representations.
     """
+
     def __init__(self, folder: Path) -> None:
         self._folder = folder
         self._docword_files = {
@@ -36,7 +39,6 @@ class ProcessedData:
         if set(self._docword_files.keys()) != set(self._vocab_files.keys()):
             raise ValueError(f'Incorrect output by tokenizer. Indices of docword files do not match vocab files.\n'
                              f'{self._docword_files.keys()} | {self._vocab_files.keys()}')
-
         self._indices = list(self._docword_files.keys())
         self._tokens_vocab = {ind: None for ind in self._indices}
         self._docword = {ind: None for ind in self._indices}
@@ -106,6 +108,50 @@ class ProcessedData:
             self._docword[ind] = docword
 
         return self._docword[ind]
+
+    def load_all_files_docword(self, ind: int) -> (Dict[str, Counter], str):
+        """
+        :param ind: index of docword file.
+        :return: mapping from repository names to counts of tokens in them.
+        """
+        doc_name = ""
+        if self._docword[ind] is None:
+            docword = {}
+
+            with self._docword_files[ind].open('r') as fin:
+                doc_name = fin.readline()
+                for line in fin:
+                    line = line.strip()
+                    if line:
+                        repo_name, rest = line.split(';')
+                        token_counter = Counter()
+                        if rest != "":
+                            for token_count in rest.split(','):
+                                token_ind, count = token_count.split(':')
+                                token_counter[int(token_ind)] = int(count)
+                        docword[repo_name] = token_counter
+                files_names = list(docword.keys())
+                idx = 0
+                stack = []
+                docword['/'] = Counter()
+                while idx < len(files_names):
+                    curr_name = files_names[idx]
+                    counter = docword[curr_name]
+                    curr_name = curr_name[:curr_name.rfind('/')]
+                    docword['/'] += counter
+                    idx += 1
+                    while curr_name != '':
+                        if len(stack) > 0 and curr_name == stack[-1][0]:
+                            counter += stack[-1][1]
+                            stack.pop()
+                        if idx < len(files_names) and files_names[idx].startswith(curr_name + '/'):
+                            stack.append((curr_name, counter))
+                            break
+                        else:
+                            docword[curr_name] = counter
+                            curr_name = curr_name[:curr_name.rfind('/')]
+            self._docword[ind] = collections.OrderedDict(sorted(docword.items()))
+        return self._docword[ind], doc_name
 
     def store_repo_names(self, repo_names: List[str]) -> None:
         self._repo_names = repo_names
@@ -227,7 +273,6 @@ def get_top_supertokens(
 def filter_by_language(
         vectors: np.ndarray, project_names: List[str], language: str, min_stars: int
 ) -> Tuple[np.ndarray, List[str]]:
-
     languages = get_project_languages(min_stars)
     indices = [i for i, lang in enumerate(languages) if lang.lower() == language.lower()]
     filtered_vectors = vectors[indices]
@@ -247,7 +292,7 @@ def compute_repo_stats(
         repo_stats[repo_name]['top_tokens'] = [
             (inverse_vocab[token], count) for token, count in token_counts.most_common(stats_top_tokens())
         ]
-        repo_stats[repo_name]['top_by_cluster'] = [[] for cluster in range(embedding_dim())]
+        repo_stats[repo_name]['top_by_cluster'] = [[] for _ in range(embedding_dim())]
         for token, count in token_counts.most_common():
             cluster = tokens_to_clusters[token]
             if cluster is not None and len(repo_stats[repo_name]['top_by_cluster'][cluster]) < stats_top_tokens():

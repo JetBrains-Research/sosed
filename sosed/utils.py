@@ -11,7 +11,7 @@ TOP_TOKENS = 5
 
 TOKENIZER_DIR = Path('tokenizer')
 TOKENIZER_URL = 'https://github.com/JetBrains-Research/identifiers-extractor.git'
-TOKENIZER_VERSION = 'v1.1.1'
+TOKENIZER_VERSION = 'v1.2.1'
 
 DATA_LINK = 'https://s3-eu-west-1.amazonaws.com/resources.ml.labs.aws.intellij.net/sosed/{}'
 DATA_TC_ARCHIVE = 'data_tc.tar.xz'
