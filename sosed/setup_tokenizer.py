@@ -1,6 +1,6 @@
 import os
 
-from .utils import *
+from utils import *
 
 
 def setup_tokenizer() -> None:
