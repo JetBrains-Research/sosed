@@ -97,7 +97,7 @@ def analyze_topics(
             if repo_name != "":
                 json_data['data'].append(repo_data)
             repo_name = file_name[:-1]
-            repo_data = {'path': repo_name, 'files': []}
+            repo_data = {'path': repo_name.rstrip('\n'), 'files': []}
         file_data = {'path': file_name[len(repo_name):], 'topics': [], 'probs': []}
         topics = np.argsort(repo_vector)[-5:][::-1]
         if cnt != 0:
