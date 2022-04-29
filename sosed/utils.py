@@ -46,7 +46,7 @@ def mkdir(path: str) -> None:
 def download_tc_data() -> None:
     mkdir(DATA_DIR)
 
-    os.system(f'wget {DATA_LINK.format(DATA_TC_ARCHIVE)}')
+    os.system(f'wget {DATA_LINK.format(DATA_TC_ARCHIVE)} || curl -O {DATA_LINK.format(DATA_TC_ARCHIVE)}')
     os.system(f'tar -xvf {DATA_TC_ARCHIVE} -C {DATA_DIR}')
     os.remove(DATA_TC_ARCHIVE)
 
@@ -55,7 +55,7 @@ def download_data(min_stars: int) -> None:
     mkdir(DATA_DIR)
 
     data_stars = DATA_STARS_ARCHIVE.format(min_stars)
-    os.system(f'wget {DATA_LINK.format(data_stars)}')
+    os.system(f'wget {DATA_LINK.format(data_stars)} || curl -O {DATA_LINK.format(DATA_TC_ARCHIVE)}')
     os.system(f'tar -xvf {data_stars} -C {DATA_DIR}')
     os.remove(data_stars)
 
